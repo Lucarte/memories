@@ -12,14 +12,14 @@ use App\Http\Controllers\RegisterController;
 // All routes that deal with registration or login, or that need authentification will have the prefix 'auth'
 Route::prefix('auth')->group(function () {
     // Public Endpoints
-    Route::get('/register', [RegisterController::class, 'index']); // Do I even need this route?
-    Route::get('/login', [LoginController::class, 'index']); // Do I even need this route?
-    Route::post('/register', RegisterController::class);
-    Route::post('/login', LoginController::class);
+    // Route::get('/register', [RegisterController::class, 'index']); // Do I even need this route?
+    // Route::get('/login', [LoginController::class, 'index']); // Do I even need this route?
+    // Route::post('/register', RegisterController::class);
+    // Route::post('/login', LoginController::class);
 
     // Secure Endpoints - needing authentication
     Route::controller()->middleware('auth:sanctum')->group(function () {
-        Route::post('/fan/logout', LogoutController::class);
+        // Route::post('/logout', LogoutController::class);
 
         Route::controller(MemoryController::class)->group(function () {
             // // => So ok?
@@ -57,9 +57,9 @@ Route::prefix('auth')->group(function () {
             Route::get('/fans', 'fansList');
 
             // Only 'admin' or owner can update their info and if need be, delete profile
-            Route::get('/fan/{id}', 'getById')->whereNumeric('id');
-            Route::patch('/fan/{id}', 'update')->whereNumeric('id');
-            Route::delete('/fan/{id}', 'delete')->whereNumeric('id');
+            Route::get('/fan/{id}', 'getById');
+            Route::patch('/fan/{id}', 'update');
+            Route::delete('/fan/{id}', 'delete');
         });
     });
 });

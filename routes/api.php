@@ -3,53 +3,50 @@
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\FanController;
+use App\Http\Controllers\FileController;
 use App\Http\Controllers\LoginController;
 use App\Http\Controllers\LogoutController;
 use App\Http\Controllers\MemoryController;
+use App\Http\Controllers\SearchController;
 use App\Http\Controllers\CommentController;
 use App\Http\Controllers\RegisterController;
 
 // All routes that deal with registration or login, or that need authentification will have the prefix 'auth'
 Route::prefix('auth')->group(function () {
     // Public Endpoints
-    // Route::get('/register', [RegisterController::class, 'index']); // Do I even need this route?
-    // Route::get('/login', [LoginController::class, 'index']); // Do I even need this route?
-    // Route::post('/register', RegisterController::class);
-    // Route::post('/login', LoginController::class);
+    Route::post('/register', RegisterController::class);
+    Route::post('/login', LoginController::class);
 
     // Secure Endpoints - needing authentication
     Route::controller()->middleware('auth:sanctum')->group(function () {
-        // Route::post('/logout', LogoutController::class);
+        Route::post('/logout', LogoutController::class);
 
         Route::controller(MemoryController::class)->group(function () {
-            // // => So ok?
-            Route::get('/memories', 'show');
-            Route::get('/memories/{kid}', 'show');
-            Route::get('/memory', 'form'); // Do I even need this route?
+            Route::get('/memories', 'index');
+            Route::get('/memory/{title}', 'show');
+            Route::get('/memories/{kid}', 'index');
             Route::post('/memory', 'create');
             Route::patch('/memory/{title}', 'update');
             Route::delete('/memory/{title}', 'delete');
-
-            //  // => Oder brauche ich explizit patch oder delete ?
-            // Route::get('/memory/form', 'form'); // Do I even need this route?
-            // Route::post('/memory/create', 'create');
-            // Route::patch('/memory/update/{title}', 'update');
-            // Route::delete('/memory/delete/{title}', 'delete');
         });
 
         Route::controller(CommentController::class)->group(function () {
-            Route::get('/memory/{title}/comment', 'form'); // Do I even need this route?
-            Route::get('/memory/{title}/comments', 'show'); // If the '/memory/{title}' endpoint shows all comments by default I would not need this endpoint, correct? I could just work with css to make the comments hide, right?
             Route::post('/memory/{title}/comment', 'create');
             Route::patch('/memory/{title}/comment/{id}', 'update');
             Route::delete('/memory/{title}/comment/{id}', 'delete');
         });
 
-        // Route::controller(SearchController::class)->group(function () {
-        //     Route::get('/search/{category}', 'show');
-        //     Route::get('/search/{title}', 'show');
-        //     Route::get('/search/{date}', 'show');
-        // });
+        Route::controller(FileController::class)->group(function () {
+            Route::get('/file/{title}', 'show')->whereNumber('id');
+            Route::delete('/file/{title}', 'delete')->whereNumber('id');
+            Route::post('/file/{title}', 'update')->whereNumber('id');
+        });
+
+        Route::controller(SearchController::class)->group(function () {
+            Route::get('/search/{category}/{keyword}', 'index');
+            Route::get('/search/{title}', 'index');
+            Route::get('/search/{date}', 'index');
+        });
 
         // ADMIN & profile owners
         Route::controller(FanController::class)->group(function () {

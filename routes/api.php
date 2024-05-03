@@ -11,6 +11,10 @@ use App\Http\Controllers\SearchController;
 use App\Http\Controllers\CommentController;
 use App\Http\Controllers\RegisterController;
 
+
+Route::get('simple-req', [MemoryController::class, 'simpleReq']);
+Route::post('simple-req', [MemoryController::class, 'simpleReq']);
+
 // All routes that deal with registration or login, or that need authentification will have the prefix 'auth'
 Route::prefix('auth')->group(function () {
     // Public Endpoints

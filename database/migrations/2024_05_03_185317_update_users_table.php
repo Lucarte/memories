@@ -11,18 +11,18 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('fans', function (Blueprint $table) {
-            $table->id();
+        // Drop columns
+        Schema::table('users', function (Blueprint $table) {
+            $table->dropColumn('name');
+        });
+
+        // Recreate columns with modified enum
+        Schema::table('users', function (Blueprint $table) {
             $table->string('first_name');
             $table->string('last_name');
-            $table->string('email')->unique();
-            $table->timestamp('email_verified_at')->nullable()->default(null);
-            $table->string('password');
             $table->enum('relationship_to_kid', ['Family', 'Friend', 'Teacher']);
             $table->boolean('terms')->default(0);
             $table->boolean('is_admin')->default(false);
-            $table->rememberToken();
-            $table->timestamps();
         });
     }
 
@@ -31,6 +31,13 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('fans');
+        // Drop columns
+        Schema::table('users', function (Blueprint $table) {
+            $table->string('first_name');
+            $table->string('last_name');
+            $table->enum('relationship_to_kid', ['Family', 'Friend', 'Teacher']);
+            $table->boolean('terms')->default(0);
+            $table->boolean('is_admin')->default(false);
+        });
     }
 };

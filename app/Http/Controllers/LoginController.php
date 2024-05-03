@@ -30,10 +30,10 @@ class LoginController extends Controller
         ];
 
         if (Auth::attempt($credentials)) {
-            $user = Auth::user();
-            $firstName = $user->firstName;
+            $fan = Auth::user();
+            $firstName = $fan->first_name;
 
-            return response()->json(['user' => $user, 'message' => "Login successful, $firstName!"], Response::HTTP_OK);
+            return response()->json(['fan' => $fan, 'message' => "Login successful, $firstName!"], Response::HTTP_OK);
         } else {
             // Authentication failed
             return response()->json(['message' => 'Login failed'], Response::HTTP_UNAUTHORIZED);

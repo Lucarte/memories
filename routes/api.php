@@ -2,15 +2,14 @@
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\FanController;
 use App\Http\Controllers\FileController;
+use App\Http\Controllers\UserController;
 use App\Http\Controllers\LoginController;
 use App\Http\Controllers\LogoutController;
 use App\Http\Controllers\MemoryController;
 use App\Http\Controllers\SearchController;
 use App\Http\Controllers\CommentController;
 use App\Http\Controllers\RegisterController;
-
 
 Route::get('simple-req', [MemoryController::class, 'simpleReq']);
 Route::post('simple-req', [MemoryController::class, 'simpleReq']);
@@ -53,7 +52,7 @@ Route::prefix('auth')->group(function () {
         });
 
         // ADMIN & profile owners
-        Route::controller(FanController::class)->group(function () {
+        Route::controller(UserController::class)->group(function () {
             // Only 'admin' (set manually on DB) can see the fans list
             Route::get('/fans', 'fansList');
 

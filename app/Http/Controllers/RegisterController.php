@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Fan;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Validation\Rule;
@@ -31,7 +31,7 @@ class RegisterController extends Controller
                 'string',
                 'email',
                 'max:255',
-                'unique:fans'
+                'unique:users'
             ],
             'password' => [
                 'required', 'string',
@@ -50,7 +50,7 @@ class RegisterController extends Controller
             'terms' => ['required']
         ]);
 
-        $fan = Fan::create([
+        $user = User::create([
             'first_name' => $request->get('firstName'),
             'last_name' => $request->get('lastName'),
             'email' => $request->get('email'),
@@ -59,10 +59,10 @@ class RegisterController extends Controller
             'terms' => $request->get('terms'),
         ]);
 
-        Auth::login($fan);
+        Auth::login($user);
         $request->session()->regenerate();
 
-        $firstName = $fan->first_name;
+        $firstName = $user->first_name;
         return response()->json(['message' => "Registration successful! You can now login, $firstName!"], Response::HTTP_CREATED);
     }
 }

@@ -37,11 +37,7 @@ class RegisterController extends Controller
                 'required', 'string',
                 Password::min(8)->letters()->numbers()->mixedCase()->symbols()
             ],
-            // 'passwordConfirmation' => [
-            //     'required',
-            //     'min:8',
-            //     'same:password'
-            // ],
+            'passwordConfirmation' => ['required', 'min:8', 'same:password'],
             'relationshipToKid' => ['string', Rule::in([
                 'Family',
                 'Friend',

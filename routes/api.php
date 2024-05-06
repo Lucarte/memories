@@ -11,9 +11,6 @@ use App\Http\Controllers\SearchController;
 use App\Http\Controllers\CommentController;
 use App\Http\Controllers\RegisterController;
 
-Route::get('simple-req', [MemoryController::class, 'simpleReq']);
-Route::post('simple-req', [MemoryController::class, 'simpleReq']);
-
 // All routes that deal with registration or login, or that need authentification will have the prefix 'auth'
 Route::prefix('auth')->group(function () {
     // Public Endpoints
@@ -54,7 +51,7 @@ Route::prefix('auth')->group(function () {
         // ADMIN & profile owners
         Route::controller(UserController::class)->group(function () {
             // Only 'admin' (set manually on DB) can see the fans list
-            Route::get('/fans', 'fansList');
+            Route::get('/fans', 'index');
 
             // Only 'admin' or owner can update their info and if need be, delete profile
             Route::get('/fan/{id}', 'getById');

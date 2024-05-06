@@ -27,6 +27,7 @@ class User extends Authenticatable
         'last_name',
         'email',
         'password',
+        'password_confirmation',
         'relationship_to_kid',
         'terms'
     ];

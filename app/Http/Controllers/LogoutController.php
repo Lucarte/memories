@@ -14,6 +14,9 @@ class LogoutController extends Controller
         // try this if does not work
         Auth::guard('web')->logout();
 
-        return response()->json(['message' => 'You have been logged out successfully!']);
+        $user = Auth::user();
+        $firstName = $user->first_name;
+
+        return response()->json(['message' => "You have been logged out successfully, $firstName!"]);
     }
 }

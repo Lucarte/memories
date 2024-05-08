@@ -24,7 +24,7 @@ Route::prefix('auth')->group(function () {
         Route::controller(MemoryController::class)->group(function () {
             Route::get('/memories', 'index');
             Route::get('/memory/{title}', 'show');
-            Route::get('/memories/{kid}', 'index');
+            Route::get('/memories/{kid}', 'indexKid');
             Route::post('/memory', 'create');
             Route::patch('/memory/{title}', 'update');
             Route::delete('/memory/{title}', 'delete');
@@ -37,9 +37,9 @@ Route::prefix('auth')->group(function () {
         });
 
         Route::controller(FileController::class)->group(function () {
-            Route::get('/file/{title}', 'show')->whereNumber('id');
-            Route::delete('/file/{title}', 'delete')->whereNumber('id');
-            Route::post('/file/{title}', 'update')->whereNumber('id');
+            Route::get('/file/{title}', 'show')->whereAlpha('title');
+            Route::delete('/file/{title}', 'delete')->whereAlpha('title');
+            Route::post('/file/{title}', 'update')->whereAlpha('title');
         });
 
         Route::controller(SearchController::class)->group(function () {

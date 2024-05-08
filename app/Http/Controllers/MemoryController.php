@@ -23,6 +23,7 @@ class MemoryController extends Controller
                     'category' => 'nullable|string|in:image,video,audio',
                     'title' => 'required|string|max:255',
                     'description' => 'required|string',
+                    'kid' => 'required|string|min:5|max:9',
                     'file_path' => 'nullable',
                 ]);
 
@@ -45,6 +46,7 @@ class MemoryController extends Controller
                 $memory->category = $request->input('category');
                 $memory->title = $request->input('title');
                 $memory->description = $request->input('description');
+                $memory->kid = $request->input('kid');
                 $memory->save();
 
                 // Handle file upload and storage

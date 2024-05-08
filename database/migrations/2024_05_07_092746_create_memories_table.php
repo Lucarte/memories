@@ -17,6 +17,7 @@ return new class extends Migration
             $table->string('category')->nullable();
             $table->string('title')->unique();
             $table->text('description');
+            $table->string('kid');
             $table->timestamps();
 
             // Foreign key constraints with ON UPDATE CASCADE and ON DELETE CASCADE

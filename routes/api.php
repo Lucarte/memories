@@ -37,9 +37,9 @@ Route::prefix('auth')->group(function () {
         });
 
         Route::controller(FileController::class)->group(function () {
-            Route::get('/file/{title}', 'show')->whereAlpha('title');
-            Route::delete('/file/{title}', 'delete')->whereAlpha('title');
-            Route::post('/file/{title}', 'update')->whereAlpha('title');
+            Route::get('/file/{title}', 'show')->whereAlphaNumeric('title');
+            Route::delete('/file/{title}', 'delete')->whereAlphaNumeric('title');
+            Route::post('/file/{title}', 'update')->whereAlphaNumeric('title');
         });
 
         Route::controller(SearchController::class)->group(function () {

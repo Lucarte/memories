@@ -13,6 +13,11 @@ class FilePolicy
         return $user->isAdmin() ? true : null;
     }
 
+    public function create(User $user)
+    {
+        return $user->id !== null ? Response::allow('FilePolicy - create - allowed') : Response::deny('FilePolicy - create - denied');
+    }
+
     public function show(User $user)
     {
         return $user->id !== null ? Response::allow('FilePolicy - show - allowed') : Response::deny('FilePolicy - show - denied');
@@ -20,7 +25,7 @@ class FilePolicy
 
     public function delete(User $user, File $file)
     {
-        return $user->title === $file->user_id ? Response::allow('FilePolicy - delete - allowed') : Response::deny('FilePolicy - delete - denied');
+        return $user->id === $file->user_id ? Response::allow('FilePolicy - delete - allowed') : Response::deny('FilePolicy - delete - denied');
     }
 
     public function update(User $user, File $file)

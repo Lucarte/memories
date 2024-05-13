@@ -18,8 +18,8 @@ class Memory extends Model
         'category',
         'title',
         'description',
-        'file_path',
         'kid',
+        // 'file_id',
     ];
 
     public function user()
@@ -27,7 +27,7 @@ class Memory extends Model
         return $this->belongsTo(User::class, 'user_id', 'id');
     }
 
-    public function file()
+    public function files()
     {
         return $this->hasMany(File::class, 'memory_id');
     }

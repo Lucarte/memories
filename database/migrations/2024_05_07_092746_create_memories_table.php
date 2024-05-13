@@ -12,17 +12,17 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('memories', function (Blueprint $table) {
-            $table->id();
-            $table->string('file_path')->nullable();
-            $table->string('category')->nullable();
-            $table->string('title')->unique();
-            $table->text('description');
-            $table->string('kid');
+            $table->id()->comment('PK from memories');
+            $table->enum('category', ['Music', 'Sport', 'Dance', 'Viola', 'Musical Theater', 'Programming', 'Art', 'Various'])->comment('Category a memory belongs to');
+            $table->string('title', 100)->unique()->comment('Title of the memory');
+            $table->text('description')->comment('Description of the memory');
+            $table->string('kid', 9)->comment('Is this Pablo\'s or Gabi\'s memory?');
             $table->timestamps();
 
-            // Foreign key constraints with ON UPDATE CASCADE and ON DELETE CASCADE
+            // Foreign key constraints with ON UPDATE / ON DELETE CASCADE
 
             $table->foreignId('user_id')
+                ->index()
                 ->constrained('users')
                 ->onUpdate('cascade')
                 ->onDelete('cascade');

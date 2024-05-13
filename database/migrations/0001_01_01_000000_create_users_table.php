@@ -1,8 +1,8 @@
 <?php
 
-use Illuminate\Database\Migrations\Migration;
-use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Database\Migrations\Migration;
 
 return new class extends Migration
 {
@@ -12,11 +12,15 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('users', function (Blueprint $table) {
-            $table->id();
-            $table->string('name');
-            $table->string('email')->unique();
+            $table->id()->comment('PK from users');
+            $table->string('first_name')->comment('First name of person registering');
+            $table->string('last_name')->comment('Last name of person registering');
+            $table->string('email')->unique()->comment('E-Mail of person registering');
             $table->timestamp('email_verified_at')->nullable();
-            $table->string('password');
+            $table->string('password')->comment('Password used to login later');
+            $table->enum('relationship_to_kid', ['Family', 'Friend', 'Teacher']);
+            $table->boolean('terms')->default(0)->comment('Agreeance ot the terms and conditions');
+            $table->boolean('is_admin')->default(false)->comment('Hat this person an admin role');
             $table->rememberToken();
             $table->timestamps();
         });

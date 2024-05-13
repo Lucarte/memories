@@ -24,8 +24,8 @@ Route::prefix('auth')->group(function () {
         Route::controller(MemoryController::class)->group(function () {
             Route::get('/memories', 'index');
             Route::get('/memory/{title}', 'show');
-            Route::get('/memories/{kid}', 'indexKid');
-            Route::post('/memory', 'create');
+            Route::get('/memories/{kid}', 'index');
+            Route::post('/memory', 'createWithFile');
             Route::patch('/memory/{title}', 'update');
             Route::delete('/memory/{title}', 'delete');
         });
@@ -37,9 +37,9 @@ Route::prefix('auth')->group(function () {
         });
 
         Route::controller(FileController::class)->group(function () {
-            Route::get('/file/{title}', 'show')->whereAlphaNumeric('title');
-            Route::delete('/file/{title}', 'delete')->whereAlphaNumeric('title');
-            Route::post('/file/{title}', 'update')->whereAlphaNumeric('title');
+            Route::get('/file/{id}', 'show')->whereNumber('id');
+            Route::delete('/file/{id}', 'delete')->whereNumber('id');
+            Route::post('/file/{id}', 'update')->whereNumber('id'); // Patch does not work!?
         });
 
         Route::controller(SearchController::class)->group(function () {

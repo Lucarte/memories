@@ -12,24 +12,25 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('replies', function (Blueprint $table) {
-            $table->id();
-            $table->text('reply')->comment('Actual reply text');;
+            $table->id()->comment('PK to replies');
+            $table->text('reply')->comment('Actual reply text');
             $table->timestamps();
 
             // Foreign key constraints
             $table->foreignId('user_id')
                 ->index()
-                ->constrained('users')
+                ->constrained()
                 ->onUpdate('cascade')
                 ->onDelete('cascade');
 
             $table->foreignId('comment_id')
                 ->index()
-                ->constrained('comments')
+                ->constrained()
                 ->onUpdate('cascade')
                 ->onDelete('cascade');
 
             $table->foreignId('parent_id')
+                ->nullable()
                 ->index()
                 ->constrained('replies')
                 ->onUpdate('cascade')

@@ -38,9 +38,9 @@ Route::prefix('auth')->group(function () {
         });
 
         Route::controller(ReplyController::class)->group(function () {
-            Route::post('/memory/{title}/comment/{id}/reply', 'create');
-            Route::patch('/memory/{title}/comment/{id}/reply', 'update');
-            Route::delete('/memory/{title}/comment/{id}/reply', 'delete');
+            Route::post('/comment/{id}/reply', 'create');
+            Route::patch('/comment/{id}/reply/{replyId}', 'update');
+            Route::delete('/comment/{id}/reply/{replyId}', 'delete');
         });
 
         Route::controller(FileController::class)->group(function () {

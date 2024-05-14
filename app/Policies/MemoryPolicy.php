@@ -29,9 +29,9 @@ class MemoryPolicy
         return $user->id !== null ? Response::allow('MemoryPolicy - show - allowed') : Response::deny('MemoryPolicy - show - denied');
     }
 
-    public function create(User $user)
+    public function createWithFile(User $user)
     {
-        return $user !== null ? Response::allow('MemoryPolicy - create - allowed') : Response::deny('MemoryPolicy - create - denied');
+        return $user !== null ? Response::allow('MemoryPolicy - createWithFile - allowed') : Response::deny('MemoryPolicy - createWithFile - denied');
     }
 
     public function delete(User $user, Memory $memory)

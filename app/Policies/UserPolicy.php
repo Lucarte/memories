@@ -11,14 +11,14 @@ class UserPolicy
     {
         // Fans can perform update, getById, and delete for themselves only
         if (in_array($ability, ['update', 'getById', 'delete'])) {
-            $userId = (int) request()->route('id'); // Cast to integer for comparison
+            $userId = (int) request()->route('id');
             if ($userId === $user->id) {
                 return Response::allow('UserPolicy - allowed');
             }
         }
 
         // Admin can do all CRUD Ops for all
-        return $user->isAdmin() ? Response::allow('UserPolicy - allowed') : null;
+        return $user->isAdmin() ? Response::allow('UserPolicy - admin - allowed') : null;
     }
 
     public function index(User $user)
@@ -35,6 +35,7 @@ class UserPolicy
     {
         return $user->id === $id ? Response::allow('UserPolicy - get - allowed') : Response::deny('UserPolicy - get - denied');
     }
+
     public function update(User $user, $id)
     {
         return $user->id === $id ? Response::allow('UserPolicy - update - allowed') : Response::deny('UserPolicy - update - denied');

@@ -4,7 +4,6 @@ namespace App\Policies;
 
 use App\Models\File;
 use App\Models\User;
-use Illuminate\Http\Response;
 
 class FilePolicy
 {
@@ -13,23 +12,21 @@ class FilePolicy
         return $user->isAdmin() ? true : null;
     }
 
-    public function create(User $user)
-    {
-        return $user->id !== null ? Response::allow('FilePolicy - create - allowed') : Response::deny('FilePolicy - create - denied');
-    }
-
     public function show(User $user)
     {
-        return $user->id !== null ? Response::allow('FilePolicy - show - allowed') : Response::deny('FilePolicy - show - denied');
+        // Allow files to be shown
+        return true;
     }
 
     public function delete(User $user, File $file)
     {
-        return $user->id === $file->user_id ? Response::allow('FilePolicy - delete - allowed') : Response::deny('FilePolicy - delete - denied');
+        // Deny deletion
+        return false;
     }
 
     public function update(User $user, File $file)
     {
-        return $user->id === $file->user_id ? Response::allow('FilePolicy - update - allowed') : Response::deny('FilePolicy - update - denied');
+        // Deny update
+        return false;
     }
 }

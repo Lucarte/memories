@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Reply;
 use App\Models\Memory;
 use App\Models\Comment;
 use Illuminate\Http\Request;
@@ -10,17 +11,17 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Validator;
 
-class CommentController extends Controller
+class ReplyController extends Controller
 {
-
-    public function create(Request $request, $title)
+    public function create(Request $request, $title, $id)
     {
         try {
-            $policyResp = Gate::inspect('create', Comment::class);
+            $policyResp = Gate::inspect('create', Reply::class);
 
             if ($policyResp->allowed()) {
                 // Retrieve the memory ID based on the title
                 $memory = Memory::where('title', $title)->first();
+                $comment = Comment::where('id', $id)->first();
 
                 if (!$memory) {
                     return response()->json(['message' => 'Memory not found'], Response::HTTP_NOT_FOUND);
@@ -28,7 +29,7 @@ class CommentController extends Controller
 
                 // Validate
                 $rules = [
-                    'comment' => 'required|string',
+                    'reply' => 'required|string',
                 ];
 
                 $validator = Validator::make($request->all(), $rules);
@@ -37,20 +38,22 @@ class CommentController extends Controller
                     return response()->json(['message' => $validator->errors()], Response::HTTP_BAD_REQUEST);
                 }
 
-                // Create a new comment instance
-                $comment = new Comment();
-                $comment->user_id = Auth::id();
-                $comment->memory_id = $memory->id; // Assign the memory ID
-                $comment->comment = $request->input('comment'); // Assign the comment text
-                $comment->save();
+                // Create a new reply instance
+                $reply = new Reply();
+                $reply->user_id = Auth::id();
+                $reply->memory_id = $memory->id; // Assign the memory ID
+                $reply->comment_id = $comment->id; // Assign the comment ID
+                $reply->reply = $request->input('reply'); // Assign the reply text
+                $reply->save();
 
                 // Return success response
-                return response()->json(['message' => 'Comment created successfully'], Response::HTTP_CREATED);
+                return response()->json(['message' => 'Reply created successfully'], Response::HTTP_CREATED);
             }
         } catch (\Exception $e) {
             return response()->json(['message' => '===FATAL=== ' . $e->getMessage()], Response::HTTP_INTERNAL_SERVER_ERROR);
         }
     }
+
     public function delete(Request $request, $title, $id)
     {
         try {

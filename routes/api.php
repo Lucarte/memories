@@ -5,6 +5,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\FileController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\LoginController;
+use App\Http\Controllers\ReplyController;
 use App\Http\Controllers\LogoutController;
 use App\Http\Controllers\MemoryController;
 use App\Http\Controllers\SearchController;
@@ -36,10 +37,16 @@ Route::prefix('auth')->group(function () {
             Route::delete('/memory/{title}/comment/{id}', 'delete');
         });
 
+        Route::controller(ReplyController::class)->group(function () {
+            Route::post('/memory/{title}/comment/{id}/reply', 'create');
+            Route::patch('/memory/{title}/comment/{id}/reply', 'update');
+            Route::delete('/memory/{title}/comment/{id}/reply', 'delete');
+        });
+
         Route::controller(FileController::class)->group(function () {
             Route::get('/file/{id}', 'show')->whereNumber('id');
             Route::delete('/file/{id}', 'delete')->whereNumber('id');
-            Route::post('/file/{id}', 'update')->whereNumber('id'); // Patch does not work!?
+            Route::patch('/file/{id}', 'update')->whereNumber('id');
         });
 
         Route::controller(SearchController::class)->group(function () {

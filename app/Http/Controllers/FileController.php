@@ -2,9 +2,13 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\{File, Memory};
-use Illuminate\Http\{Request, Response};
-use Illuminate\Support\Facades\{Auth, Gate, Storage, Validator};
+use App\Models\File;
+use App\Models\Memory;
+use Illuminate\Http\Request;
+use Illuminate\Http\Response;
+use Illuminate\Validation\Rule;
+use Illuminate\Support\Facades\Gate;
+use Illuminate\Support\Facades\Storage;
 
 class FileController extends Controller
 {
@@ -12,43 +16,25 @@ class FileController extends Controller
     public function show(int $id)
     {
         try {
+            // Find the file by its ID
             $file = File::find($id);
 
             if (!$file) {
                 return response()->json(['message' => 'File not found'], Response::HTTP_NOT_FOUND);
             }
 
-            // Get the associated memory of the file to find the file_type
-            $memory = Memory::find($file->memory_id);
+            // Construct full path to file in the storage directory
+            $filePath = storage_path('app/public/' . $file->file_path);
 
-            if (!$memory) {
-                return response()->json(['message' => 'File does not have an associated memory'], Response::HTTP_BAD_REQUEST);
-            }
-
-            // Get file_type
-            $fileType = $memory->file_type;
-            $filePath = $memory->file_path;
-
-            // if ($fileType === 'image') {
-            //     $filePath = storage_path('app/public/' . $file->image_path);
-            // } elseif ($fileType === 'video') {
-            //     $filePath = storage_path('app/public/' . $file->video_path);
-            // } elseif ($fileType === 'audio') {
-            //     $filePath = storage_path('app/public/' . $file->audio_path);
-            // } else {
-            //     // If another file type
-            //     return response()->json(['message' => 'Invalid file type'], Response::HTTP_BAD_REQUEST);
-            // }
-
-            // Check if the file exists
+            // Check if file exists
             if (!file_exists($filePath)) {
                 return response()->json(['message' => 'File not found'], Response::HTTP_NOT_FOUND);
             }
 
-            // Read the file and return it
+            // Read content and return it
             $fileData = file_get_contents($filePath);
 
-            // Determine the content type based on the file extension
+            // Determine content type based on file extension
             $contentType = mime_content_type($filePath);
 
             return response($fileData)->header('Content-Type', $contentType);
@@ -60,24 +46,21 @@ class FileController extends Controller
     public function delete(int $id)
     {
         try {
+            // Find the file by its ID
             $file = File::find($id);
-
-            if (!$file) {
-                return response()->json(['message' => 'File not found'], Response::HTTP_NOT_FOUND);
-            }
 
             // Check authorization using Gate policy
             $policyResp = Gate::inspect('delete', $file);
 
             if ($policyResp->allowed()) {
                 if ($file) {
-                    // Delete file
                     $file->delete();
                     return response()->json(['message' => 'File deleted successfully'], Response::HTTP_OK);
+                } else {
+                    return response()->json(['message' => 'File not found'], Response::HTTP_NOT_FOUND);
                 }
             }
-
-            return response()->json(['message' => $policyResp->message()], Response::HTTP_FORBIDDEN);
+            return response()->json(['message' => 'FilePolicy - delete - denied'], Response::HTTP_FORBIDDEN);
         } catch (\Exception $e) {
             return response()->json(['message' => '===FATAL=== ' . $e->getMessage()], Response::HTTP_INTERNAL_SERVER_ERROR);
         }
@@ -96,43 +79,43 @@ class FileController extends Controller
             $policyResp = Gate::inspect('update', $file);
 
             if ($policyResp->allowed()) {
+
+                // Validate the file
+                $request->validate([
+                    'file_type' => ['required', 'string', Rule::in(['image', 'video', 'audio'])],
+                    // 'file_path' => 'required|file|mimes:jpeg,png,gif,svg,webp,avi,mpeg,quicktime,animaflex,aiff,flac,m4a,mp3,mp4,ogg,wma,heic|max:2048',
+                ]);
+
                 // Handle file upload and storage
                 if ($request->hasFile('file_path')) {
-                    // Determine which specific path to update based on the file type
-                    $pathField = $this->getPathFieldForFileType($file->file_type);
+                    $uploadedFile = $request->file('file_path');
+                    $extension = $uploadedFile->extension();
+
+                    // Determine the file type based on the extension
+                    $fileType = $request->input('file_type');
+
+                    // Ask memories table for title
+                    $title = $file->memory->title;
+
+                    // Get new path
+                    $newPath = $uploadedFile->storeAs('', time() . '_' . $title . '.' . $extension, 'public');
 
                     // Delete the old file if it exists
-                    if ($file->$pathField) {
-                        Storage::delete($file->$pathField);
+                    if ($file->file_path && Storage::disk('public')->exists($file->file_path)) {
+                        Storage::disk('public')->delete($file->file_path);
                     }
 
-                    // Store the new file
-                    $newFilePath = $request->file('file_path')->store('uploads', 'public');
-                    $file->$pathField = $newFilePath;
+                    $file->file_path = $newPath;
+                    $file->file_type = $fileType;
                 }
 
                 $file->save();
-
                 return response()->json(['message' => 'File updated successfully'], Response::HTTP_OK);
             }
 
-            return response()->json(['message' => $policyResp->message()], Response::HTTP_FORBIDDEN);
+            return response()->json(['message' => 'FilePolicy - update - denied'], Response::HTTP_FORBIDDEN);
         } catch (\Exception $e) {
             return response()->json(['message' => '===FATAL=== ' . $e->getMessage()], Response::HTTP_INTERNAL_SERVER_ERROR);
-        }
-    }
-
-    private function getPathFieldForFileType($fileType)
-    {
-        switch ($fileType) {
-            case 'image':
-                return 'image_path';
-            case 'video':
-                return 'video_path';
-            case 'audio':
-                return 'audio_path';
-            default:
-                return null; // Handle invalid file types
         }
     }
 }

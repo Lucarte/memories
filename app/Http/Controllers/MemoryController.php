@@ -23,7 +23,7 @@ class MemoryController extends Controller
     public function createWithFile(Request $request)
     {
         try {
-            $policyResp = Gate::inspect('create', Memory::class);
+            $policyResp = Gate::inspect('createWithFile', Memory::class);
 
             if ($policyResp->allowed()) {
                 // Validation rules for memory creation
@@ -148,7 +148,6 @@ class MemoryController extends Controller
                     'description' => 'required|string',
                     'category' => 'required|string',
                     'kid' => 'required|string|min:5|max:9',
-                    'file_type' => 'nullable|string|in:image,video,audio',
                 ];
 
                 $validator = Validator::make($request->all(), $rules);
@@ -158,11 +157,10 @@ class MemoryController extends Controller
                 }
 
                 // Update the memory instance
-                $memory->category = $request->input('category');
                 $memory->title = $request->input('title');
                 $memory->description = $request->input('description');
+                $memory->category = $request->input('category');
                 $memory->kid = $request->input('kid');
-                $memory->file_type = $request->input('file_type');
                 $memory->save();
 
                 return response()->json((['message' => 'Memory updated successfully!']), Response::HTTP_OK);

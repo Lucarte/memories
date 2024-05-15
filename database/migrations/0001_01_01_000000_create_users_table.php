@@ -13,8 +13,8 @@ return new class extends Migration
     {
         Schema::create('users', function (Blueprint $table) {
             $table->id()->comment('PK from users');
-            $table->string('first_name')->comment('First name of person registering');
-            $table->string('last_name')->comment('Last name of person registering');
+            $table->string('first_name', 20)->comment('First name of person registering');
+            $table->string('last_name', 20)->comment('Last name of person registering');
             $table->string('email')->unique()->comment('E-Mail of person registering');
             $table->timestamp('email_verified_at')->nullable();
             $table->string('password')->comment('Password used to login later');

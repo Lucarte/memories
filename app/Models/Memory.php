@@ -15,11 +15,12 @@ class Memory extends Model
      * @var array<int, string>
      */
     protected $fillable = [
-        'category',
         'title',
         'description',
         'kid',
-        // 'file_id',
+        'year',
+        'month',
+        'day',
     ];
 
     public function user()
@@ -30,5 +31,10 @@ class Memory extends Model
     public function files()
     {
         return $this->hasMany(File::class, 'memory_id');
+    }
+
+    public function categories()
+    {
+        return $this->belongsToMany(Category::class);
     }
 }

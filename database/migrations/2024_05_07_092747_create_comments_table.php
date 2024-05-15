@@ -19,13 +19,13 @@ return new class extends Migration
             // Foreign key constraints
             $table->foreignId('user_id')
                 ->index()
-                ->constrained('users')
+                ->constrained()
                 ->onUpdate('cascade')
                 ->onDelete('cascade');
 
             $table->foreignId('memory_id')
                 ->index()
-                ->constrained('memories')
+                ->constrained()
                 ->onUpdate('cascade')
                 ->onDelete('cascade');
         });

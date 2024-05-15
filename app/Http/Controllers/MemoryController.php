@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\File;
 use App\Models\Memory;
+use App\Models\Category;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Validation\Rule;
@@ -29,9 +30,11 @@ class MemoryController extends Controller
                 // Validation rules for memory creation
                 $rules = [
                     'title' => 'required|string|max:255',
-                    'description' => 'required|string',
-                    'category' => 'required|string',
-                    'kid' => 'required|string|min:5|max:9',
+                    'description' => 'required|string|max:2000',
+                    'kid' => 'required|string|min:4|max:9',
+                    'year' => 'required|integer|min:1900|max:2200',
+                    'month' => 'nullable|string|min:3|max:9',
+                    'day' => 'nullable|integer|min:01|max:31',
                     // 'file_path' => 'file|mimes:jpeg,png,gif,svg,webp,avi,mpeg,quicktime,animaflex,aiff,flac,m4a,mp3,mp4,ogg,wma,heic,aiff|max:2048',
                     'file_type' => ['nullable', 'string', Rule::in(['image', 'video', 'audio'])],
                 ];
@@ -45,11 +48,15 @@ class MemoryController extends Controller
                 // Create a new memory instance
                 $memory = new Memory();
                 $memory->user_id = Auth::id();
-                $memory->category = $request->input('category');
                 $memory->title = $request->input('title');
                 $memory->description = $request->input('description');
                 $memory->kid = $request->input('kid');
                 $memory->save();
+
+                // Attach categories
+                if ($request->has('category_id')) {
+                    $memory->categories()->attach($request->input('category_id'));
+                }
 
                 // Handle file upload and storage
                 if ($request->hasFile('file_path')) {
@@ -145,9 +152,13 @@ class MemoryController extends Controller
             if ($policyResp->allowed()) {
                 $rules = [
                     'title' => 'required|string|max:255',
-                    'description' => 'required|string',
-                    'category' => 'required|string',
-                    'kid' => 'required|string|min:5|max:9',
+                    'description' => 'required|string|max:2000',
+                    'kid' => 'required|string|min:4|max:9',
+                    'year' => 'required|integer|min:1900|max:2200',
+                    'month' => 'nullable|integer|min:1|max:12',
+                    'day' => 'nullable|integer|min:1|max:31',
+                    'category_ids' => 'required|array',
+                    'category_ids.*' => 'exists:categories,id',
                 ];
 
                 $validator = Validator::make($request->all(), $rules);
@@ -162,6 +173,9 @@ class MemoryController extends Controller
                 $memory->category = $request->input('category');
                 $memory->kid = $request->input('kid');
                 $memory->save();
+
+                // Associate categories with the memory
+                $memory->categories()->sync($request->input('category_ids'));
 
                 return response()->json((['message' => 'Memory updated successfully!']), Response::HTTP_OK);
             }

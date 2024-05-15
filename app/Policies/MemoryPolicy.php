@@ -31,16 +31,16 @@ class MemoryPolicy
 
     public function createWithFile(User $user)
     {
-        return $user !== null ? Response::allow('MemoryPolicy - createWithFile - allowed') : Response::deny('MemoryPolicy - createWithFile - denied');
+        return null;
     }
 
     public function delete(User $user, Memory $memory)
     {
-        return $user->id === $memory->user_id ? Response::allow('MemoryPolicy - delete - allowed') : Response::deny('MemoryPolicy - delete - denied');
+        return null;
     }
 
     public function update(User $user, Memory $memory)
     {
-        return $user->id === $memory->user_id ? Response::allow('MemoryPolicy - update - allowed') : Response::deny('MemoryPolicy - update - denied');
+        return null;
     }
 }

@@ -35,8 +35,10 @@ class MemoryController extends Controller
                     'year' => 'required|integer|min:1900|max:2200',
                     'month' => 'nullable|string|min:3|max:9',
                     'day' => 'nullable|integer|min:01|max:31',
-                    // 'file_path' => 'file|mimes:jpeg,png,gif,svg,webp,avi,mpeg,quicktime,animaflex,aiff,flac,m4a,mp3,mp4,ogg,wma,heic,aiff|max:2048',
+                    'file_path' => 'file|mimes:jpeg,png,gif,svg,webp,avi,mpeg,quicktime,animaflex,flac,m4a,mp3,mp4,ogg,wma,heic,aif',
                     'file_type' => ['nullable', 'string', Rule::in(['image', 'video', 'audio'])],
+                    'category_ids' => 'required',
+                    'category_ids.*' => 'exists:categories,id',
                 ];
 
                 $validator = Validator::make($request->all(), $rules);
@@ -51,28 +53,30 @@ class MemoryController extends Controller
                 $memory->title = $request->input('title');
                 $memory->description = $request->input('description');
                 $memory->kid = $request->input('kid');
+                $memory->year = $request->input('year');
+                $memory->month = $request->input('month');
+                $memory->day = $request->input('day');
                 $memory->save();
 
-                // Attach categories
-                if ($request->has('category_id')) {
-                    $memory->categories()->attach($request->input('category_id'));
-                }
+                // Associate categories with the memory
+                $categoryIds = explode(',', $request->input('category_ids'));
+                $memory->categories()->sync($categoryIds);
 
                 // Handle file upload and storage
-                if ($request->hasFile('file_path')) {
+                if ($request->hasFile('file_path'))
                     $uploadedFile = $request->file('file_path');
-                    $extension = $uploadedFile->getClientOriginalExtension();
-                    $title = $memory->title;
-                    $path = $uploadedFile->storeAs('', time() . '_' . $title . '.' . $extension, 'public');
+                $extension = $uploadedFile->getClientOriginalExtension();
+                $title = $memory->title;
+                $path = $uploadedFile->storeAs('', time() . '_' . $title . '.' . $extension, 'public');
 
-                    // Create a new file associated with this memory
-                    $file = new File();
-                    $file->user_id = Auth::id();
-                    $file->memory_id = $memory->id;
-                    $file->file_path = $path;
-                    $file->file_type = $request->input('file_type');
-                    $file->save();
-                }
+                // Create a new file associated with this memory
+                $file = new File();
+                $file->user_id = Auth::id();
+                $file->memory_id = $memory->id;
+                $file->file_path = $path;
+                $file->file_type = $request->input('file_type');
+                $file->save();
+
 
                 // Return success response
                 return response()->json(['message' => 'Memory created successfully with associated file'], Response::HTTP_CREATED);
@@ -155,9 +159,9 @@ class MemoryController extends Controller
                     'description' => 'required|string|max:2000',
                     'kid' => 'required|string|min:4|max:9',
                     'year' => 'required|integer|min:1900|max:2200',
-                    'month' => 'nullable|integer|min:1|max:12',
+                    'month' => 'nullable|string|min:1|max:12',
                     'day' => 'nullable|integer|min:1|max:31',
-                    'category_ids' => 'required|array',
+                    'category_ids' => 'required',
                     'category_ids.*' => 'exists:categories,id',
                 ];
 
@@ -170,12 +174,15 @@ class MemoryController extends Controller
                 // Update the memory instance
                 $memory->title = $request->input('title');
                 $memory->description = $request->input('description');
-                $memory->category = $request->input('category');
                 $memory->kid = $request->input('kid');
+                $memory->year = $request->input('year');
+                $memory->month = $request->input('month');
+                $memory->day = $request->input('day');
                 $memory->save();
 
                 // Associate categories with the memory
-                $memory->categories()->sync($request->input('category_ids'));
+                $categoryIds = explode(',', $request->input('category_ids'));
+                $memory->categories()->sync($categoryIds);
 
                 return response()->json((['message' => 'Memory updated successfully!']), Response::HTTP_OK);
             }

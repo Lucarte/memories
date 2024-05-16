@@ -29,7 +29,7 @@ class User extends Authenticatable
         'password',
         'password_confirmation',
         'relationship_to_kid',
-        'terms'
+        'terms',
     ];
 
     /**
@@ -53,6 +53,11 @@ class User extends Authenticatable
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
         ];
+    }
+
+    public function avatarFile()
+    {
+        return $this->belongsTo(File::class, 'avatar_path');
     }
 
     protected $guarded = ['password'];

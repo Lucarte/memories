@@ -3,11 +3,13 @@
 namespace App\Http\Controllers;
 
 use App\Models\User;
+use App\Models\Avatar;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Validation\Rule;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rules\Password;
-use Illuminate\Support\Facades\{Auth, Hash};
 
 class RegisterController extends Controller
 {
@@ -43,9 +45,10 @@ class RegisterController extends Controller
                 'Friend',
                 'Teacher'
             ])],
-            'terms' => ['required']
+            'terms' => ['required'],
         ]);
 
+        // Create the user
         $user = User::create([
             'first_name' => $request->get('firstName'),
             'last_name' => $request->get('lastName'),
@@ -54,6 +57,21 @@ class RegisterController extends Controller
             'relationship_to_kid' => $request->get('relationshipToKid'),
             'terms' => $request->get('terms'),
         ]);
+
+        // Create avatar file
+        if ($request->hasFile('avatar_path')) {
+            $uploadedAvatar = $request->file('avatar_path');
+            $extension = $uploadedAvatar->getClientOriginalExtension();
+            $name = $user->first_name;
+            // $path = $uploadedAvatar->storeAs('', time() . '_' . $name . '-' . 'avatar' . '.' . $extension, 'public/avatars'); // Why does it not work?
+            $path = $uploadedAvatar->storeAs('', time() . '_' . $name . '-' . 'avatar' . '.' . $extension, 'public');
+
+            // Create new avatar associated with this user
+            $avatar = new Avatar();
+            $avatar->user_id = $user->id;
+            $avatar->avatar_path = $path;
+            $avatar->save();
+        }
 
         Auth::login($user);
         $request->session()->regenerate();

@@ -9,7 +9,7 @@ class UserPolicy
 {
     public function before(User $user, $ability)
     {
-        // Fans can perform update, getById, and delete for themselves only
+        // Fans can update, getById, and delete for themselves only
         if (in_array($ability, ['update', 'getById', 'delete'])) {
             $userId = (int) request()->route('id');
             if ($userId === $user->id) {

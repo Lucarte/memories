@@ -64,7 +64,7 @@ class RegisterController extends Controller
             $extension = $uploadedAvatar->getClientOriginalExtension();
             $name = $user->first_name;
             // $path = $uploadedAvatar->storeAs('', time() . '_' . $name . '-' . 'avatar' . '.' . $extension, 'public/avatars'); // Why does it not work?
-            $path = $uploadedAvatar->storeAs('', time() . '_' . $name . '-' . 'avatar' . '.' . $extension, 'public');
+            $path = $uploadedAvatar->storeAs('avatars', time() . '_' . $name . '-' . 'avatar' . '.' . $extension, 'public');
 
             // Create new avatar associated with this user
             $avatar = new Avatar();

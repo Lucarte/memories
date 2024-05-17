@@ -37,4 +37,9 @@ class Memory extends Model
     {
         return $this->belongsToMany(Category::class);
     }
+
+    public function urls()
+    {
+        return $this->hasMany(Url::class, 'memory_id');
+    }
 }

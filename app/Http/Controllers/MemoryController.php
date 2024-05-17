@@ -2,9 +2,9 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Url;
 use App\Models\File;
 use App\Models\Memory;
-use App\Models\Category;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Validation\Rule;
@@ -34,9 +34,13 @@ class MemoryController extends Controller
                     'kid' => 'required|string|min:4|max:9',
                     'year' => 'required|integer|min:1900|max:2200',
                     'month' => 'nullable|string|min:3|max:9',
-                    'day' => 'nullable|integer|min:01|max:31',
-                    'file_path' => 'file|mimes:jpeg,png,gif,svg,webp,avi,mpeg,quicktime,animaflex,flac,m4a,mp3,mp4,ogg,wma,heic,aif',
-                    'file_type' => ['nullable', 'string', Rule::in(['image', 'video', 'audio'])],
+                    'day' => 'nullable|integer|min:1|max:31',
+                    'file_path' => 'nullable|file|mimes:jpeg,png,gif,svg,webp,avi,mpeg,quicktime,animaflex,flac,m4a,mp3,mp4,ogg,wma,heic,aif',
+                    // 'url_address' => 'nullable',
+                    'urls' => 'nullable',
+                    'urls.*' => 'nullable',
+                    'file_type' => ['nullable', 'string', Rule::in(['image', 'video', 'audio', 'url'])],
+                    // 'category_ids' => 'required|array', // does not work!
                     'category_ids' => 'required',
                     'category_ids.*' => 'exists:categories,id',
                 ];
@@ -58,28 +62,48 @@ class MemoryController extends Controller
                 $memory->day = $request->input('day');
                 $memory->save();
 
-                // Associate categories with the memory
+                // Convert comma-separated string to array
                 $categoryIds = explode(',', $request->input('category_ids'));
                 $memory->categories()->sync($categoryIds);
 
+
                 // Handle file upload and storage
-                if ($request->hasFile('file_path'))
+                if ($request->hasFile('file_path')) {
                     $uploadedFile = $request->file('file_path');
-                $extension = $uploadedFile->getClientOriginalExtension();
-                $title = $memory->title;
-                $path = $uploadedFile->storeAs('', time() . '_' . $title . '.' . $extension, 'public');
+                    $extension = $uploadedFile->getClientOriginalExtension();
+                    $title = $memory->title;
+                    $path = $uploadedFile->storeAs('uploads', time() . '_' . $title . '.' . $extension, 'public');
 
-                // Create a new file associated with this memory
-                $file = new File();
-                $file->user_id = Auth::id();
-                $file->memory_id = $memory->id;
-                $file->file_path = $path;
-                $file->file_type = $request->input('file_type');
-                $file->save();
+                    // Create a new file associated with this memory
+                    $file = new File();
+                    $file->user_id = Auth::id();
+                    $file->memory_id = $memory->id;
+                    $file->file_path = $path;
+                    $file->file_type = $request->input('file_type');
+                    $file->save();
+                }
 
+                // // Handle URLs
+                // if ($request->filled('urls')) {
+                //     $urls = $request->input('urls');
+                //     foreach ($urls as $urlAddress) {
+                //         $url = new Url();
+                //         $url->url_address = $urlAddress;
+                //         $url->memory_id = $memory->id;
+                //         $url->save();
+                //     }
+                // }
+
+                // Handle URL if provided
+                if ($request->filled('url_address')) {
+                    $url = new Url();
+                    $url->url_address = $request->input('url_address');
+                    $url->memory_id = $memory->id;
+                    $url->save();
+                }
 
                 // Return success response
-                return response()->json(['message' => 'Memory created successfully with associated file'], Response::HTTP_CREATED);
+                return response()->json(['message' => 'Memory created successfully with associated file/url'], Response::HTTP_CREATED);
             }
         } catch (\Exception $e) {
             return response()->json(['message' => '===FATAL=== ' . $e->getMessage()], Response::HTTP_INTERNAL_SERVER_ERROR);

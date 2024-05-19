@@ -2,6 +2,7 @@
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\UrlController;
 use App\Http\Controllers\FileController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\LoginController;
@@ -46,7 +47,14 @@ Route::prefix('auth')->group(function () {
         Route::controller(FileController::class)->group(function () {
             Route::get('/file/{id}', 'show')->whereNumber('id');
             Route::delete('/file/{id}', 'delete')->whereNumber('id');
-            Route::patch('/file/{id}', 'update')->whereNumber('id');
+            // Route::patch('/file/{id}', 'update')->whereNumber('id'); // PATCH not working
+            Route::post('/file/{id}', 'update')->whereNumber('id');
+        });
+
+        Route::controller(UrlController::class)->group(function () {
+            Route::get('/url/{id}', 'show')->whereNumber('id');
+            Route::delete('/url/{id}', 'delete')->whereNumber('id');
+            Route::patch('/url/{id}', 'update')->whereNumber('id');
         });
 
         Route::controller(SearchController::class)->group(function () {

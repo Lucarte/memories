@@ -80,25 +80,52 @@ class FileController extends Controller
 
             if ($policyResp->allowed()) {
 
-                // Validate the file
-                $request->validate([
-                    'file_type' => ['required', 'string', Rule::in(['image', 'video', 'audio'])],
-                    // 'file_path' => 'required|file|mimes:jpeg,png,gif,svg,webp,avi,mpeg,quicktime,animaflex,aiff,flac,m4a,mp3,mp4,ogg,wma,heic|max:2048',
-                ]);
-
-                // Handle file upload and storage
+                // Validate the file if included in the request
                 if ($request->hasFile('file_path')) {
+                    $request->validate([
+                        'file_type' => 'nullable|string|in:image,video,audio',
+                        'file_path' => [
+                            'required',
+                            'file',
+                            function ($attribute, $value, $fail) use ($request) {
+                                $maxSize = 0;
+                                $fileType = $value->getMimeType();
+
+                                switch ($fileType) {
+                                    case 'image/jpeg':
+                                    case 'image/png':
+                                    case 'image/gif':
+                                    case 'image/svg+xml':
+                                        $maxSize = 5 * 1024 * 1024; // 5MB
+                                        break;
+                                    case 'audio/x-aiff':
+                                    case 'audio/mpeg':
+                                    case 'audio/mp3':
+                                        $maxSize = 10 * 1024 * 1024; // 10MB
+                                        break;
+                                    case 'video/mp4':
+                                    case 'video/avi':
+                                    case 'video/quicktime':
+                                    case 'video/mpeg':
+                                        $maxSize = 100 * 1024 * 1024; // 100MB
+                                        break;
+                                    default:
+                                        $fail("Unsupported file type: {$fileType}");
+                                        return;
+                                }
+
+                                if ($value->getSize() > $maxSize) {
+                                    $fail("The {$attribute} must not be greater than {$maxSize} bytes.");
+                                }
+                            },
+                        ],
+                    ]);
+
                     $uploadedFile = $request->file('file_path');
-                    $extension = $uploadedFile->extension();
-
-                    // Determine the file type based on the extension
-                    $fileType = $request->input('file_type');
-
-                    // Ask memories table for title
-                    $title = $file->memory->title;
+                    $extension = $uploadedFile->getClientOriginalExtension();
 
                     // Get new path
-                    $newPath = $uploadedFile->storeAs('', time() . '_' . $title . '.' . $extension, 'public');
+                    $newPath = $uploadedFile->storeAs('uploads', time() . '_' . $file->memory->title . '.' . $extension, 'public');
 
                     // Delete the old file if it exists
                     if ($file->file_path && Storage::disk('public')->exists($file->file_path)) {
@@ -106,7 +133,16 @@ class FileController extends Controller
                     }
 
                     $file->file_path = $newPath;
-                    $file->file_type = $fileType;
+                } else {
+                    // Validate only the file type if it's being updated
+                    $request->validate([
+                        'file_type' => 'nullable|string|in:image,video,audio',
+                    ]);
+                }
+
+                // Update file type if provided
+                if ($request->filled('file_type')) {
+                    $file->file_type = $request->input('file_type');
                 }
 
                 $file->save();

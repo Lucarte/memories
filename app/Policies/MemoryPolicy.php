@@ -3,7 +3,6 @@
 namespace App\Policies;
 
 use App\Models\User;
-use App\Models\Memory;
 use Illuminate\Auth\Access\Response;
 
 class MemoryPolicy
@@ -14,14 +13,14 @@ class MemoryPolicy
         return $user->isAdmin() ? true : null;
     }
 
-    public function index()
+    public function index(User $user)
     {
-        return Response::allow('MemoryPolicy - index - allowed');
+        return $user->id !== null ? Response::allow('MemoryPolicy - index - allowed') :  Response::deny('MemoryPolicy - index - denied');
     }
 
-    public function indexKid($kid)
+    public function indexKid($kid, User $user)
     {
-        return Response::allow('MemoryPolicy - indexKid - allowed');
+        return $user->id !== null ? Response::allow('MemoryPolicy - indexKid - allowed') :  Response::deny('MemoryPolicy - indexKid - denied');
     }
 
     public function show(User $user)
@@ -29,17 +28,17 @@ class MemoryPolicy
         return $user->id !== null ? Response::allow('MemoryPolicy - show - allowed') : Response::deny('MemoryPolicy - show - denied');
     }
 
-    public function createWithFile(User $user)
+    public function createWithFile()
     {
         return null;
     }
 
-    public function delete(User $user, Memory $memory)
+    public function delete()
     {
         return null;
     }
 
-    public function update(User $user, Memory $memory)
+    public function update()
     {
         return null;
     }

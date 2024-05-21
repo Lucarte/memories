@@ -45,16 +45,17 @@ class MemoryController extends Controller
                             $fileType = $value->getMimeType();
 
                             switch ($fileType) {
+                                case 'image/jpg':
                                 case 'image/jpeg':
                                 case 'image/png':
                                 case 'image/gif':
                                 case 'image/svg':
-                                    $maxSize = 2024 * 1024; // 1MB
+                                    $maxSize = 3024 * 1024; // 3MB
                                     break;
                                 case 'audio/x-aiff':
                                 case 'audio/mpeg':
                                 case 'audio/mp3':
-                                    $maxSize = 20240 * 1024; // 10MB
+                                    $maxSize = 20240 * 1024; // 20MB
                                     // Inside the closure for file size validation
                                     Log::channel('stack')->info('Uploaded File:', ['name' => $value->getClientOriginalName(), 'size' => $value->getSize(), 'type' => $fileType]);
                                     break;
@@ -62,7 +63,7 @@ class MemoryController extends Controller
                                 case 'video/avi':
                                 case 'video/quicktime':
                                 case 'video/mpeg':
-                                    $maxSize = 202400 * 1024; // 100MB
+                                    $maxSize = 202400 * 1024; // 200MB
                                     break;
                             }
                             if ($value->getSize() > $maxSize) {

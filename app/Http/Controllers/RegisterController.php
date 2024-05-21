@@ -46,6 +46,12 @@ class RegisterController extends Controller
                 'Teacher'
             ])],
             'terms' => ['required'],
+            'avatar_path' => [
+                'nullable',
+                'file',
+                'mimes:jpg,jpeg,png,gif,svg',
+                'max:2048'
+            ],
         ]);
 
         // Create the user
@@ -63,7 +69,6 @@ class RegisterController extends Controller
             $uploadedAvatar = $request->file('avatar_path');
             $extension = $uploadedAvatar->getClientOriginalExtension();
             $name = $user->first_name;
-            // $path = $uploadedAvatar->storeAs('', time() . '_' . $name . '-' . 'avatar' . '.' . $extension, 'public/avatars'); // Why does it not work?
             $path = $uploadedAvatar->storeAs('avatars', time() . '_' . $name . '-' . 'avatar' . '.' . $extension, 'public');
 
             // Create new avatar associated with this user

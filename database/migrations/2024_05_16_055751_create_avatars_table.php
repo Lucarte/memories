@@ -12,7 +12,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('avatars', function (Blueprint $table) {
-            $table->id();
+            $table->id()->comment('PK from avatars');
             $table->string('avatar_path')->nullable(true)->comment('Path to the uploaded avatar');
             $table->timestamps();
 

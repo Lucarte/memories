@@ -21,6 +21,7 @@ class MemoryController extends Controller
     {
         $this->file = $file;
     }
+
     public function createWithFile(Request $request)
     {
         try {

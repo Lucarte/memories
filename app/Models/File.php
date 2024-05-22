@@ -2,19 +2,32 @@
 
 namespace App\Models;
 
+use Laravel\Scout\Searchable;
 use Illuminate\Database\Eloquent\Model;
 
 class File extends Model
 {
+    use Searchable;
+
     protected $fillable = [
+        'file_type',
         'file_path',
         'user_id',
         'memory_id',
-        'file_type',
     ];
 
     public function memory()
     {
         return $this->belongsTo(Memory::class, 'memory_id');
+    }
+
+    public function toSearchableArray()
+    {
+        return [
+            'file_type' =>  $this->file_type,
+            'file_path' =>  $this->file_path,
+            'user_id' => (int) $this->user_id,
+            'memory_id' => (int) $this->memory_id,
+        ];
     }
 }

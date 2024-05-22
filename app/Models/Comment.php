@@ -2,12 +2,14 @@
 
 namespace App\Models;
 
+use Laravel\Scout\Searchable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 class Comment extends Model
 {
     use HasFactory;
+    use Searchable;
 
     protected $fillable = ['user_id', 'memory_id', 'comment'];
 
@@ -24,5 +26,14 @@ class Comment extends Model
     public function replies()
     {
         return $this->hasMany(Reply::class);
+    }
+
+    public function toSearchableArray()
+    {
+        return [
+            'user_id' => (int) $this->user_id,
+            'memory_id' => (int) $this->memory_id,
+            'comment' => $this->comment,
+        ];
     }
 }

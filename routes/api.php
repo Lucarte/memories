@@ -57,12 +57,12 @@ Route::prefix('auth')->group(function () {
             Route::patch('/url/{id}', 'update')->whereNumber('id');
         });
 
-        Route::controller(SearchController::class)->group(function () {
-            Route::get('/search/{category}/{keyword}', 'CategoryKeywordIndex');
-            Route::get('/search/{category}', 'CategoryOnlyIndex');
-            Route::get('/searchTitle/{title}', 'TitleIndex');
-            Route::get('/searchDate/{date}', 'DateIndex');
-        });
+        // Route::controller(SearchController::class)->group(function () {
+        //     Route::get('/search/{category}/{keyword}', 'CategoryKeywordIndex');
+        //     Route::get('/search/{category}', 'CategoryOnlyIndex');
+        //     Route::get('/searchTitle/{title}', 'TitleIndex');
+        //     Route::get('/searchDate/{date}', 'DateIndex');
+        // });
 
         // ADMIN & profile owners
         Route::controller(UserController::class)->group(function () {

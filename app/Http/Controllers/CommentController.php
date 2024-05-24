@@ -12,7 +12,6 @@ use Illuminate\Support\Facades\Validator;
 
 class CommentController extends Controller
 {
-
     public function create(Request $request, $title)
     {
         try {
@@ -29,6 +28,7 @@ class CommentController extends Controller
                 // Validate
                 $rules = [
                     'comment' => 'required|string',
+                    'parent_id' => 'nullable|exists:comments,id', // Ensure parent_id is valid if provided
                 ];
 
                 $validator = Validator::make($request->all(), $rules);
@@ -42,15 +42,19 @@ class CommentController extends Controller
                 $comment->user_id = Auth::id();
                 $comment->memory_id = $memory->id; // Assign the memory ID
                 $comment->comment = $request->input('comment'); // Assign the comment text
+                $comment->parent_id = $request->input('parent_id'); // Assign the parent ID if provided
                 $comment->save();
 
                 // Return success response
                 return response()->json(['message' => 'Comment created successfully'], Response::HTTP_CREATED);
+            } else {
+                return response()->json(['message' => $policyResp->message()], Response::HTTP_FORBIDDEN);
             }
         } catch (\Exception $e) {
             return response()->json(['message' => '===FATAL=== ' . $e->getMessage()], Response::HTTP_INTERNAL_SERVER_ERROR);
         }
     }
+
     public function delete(Request $request, $title, $id)
     {
         try {
@@ -69,7 +73,6 @@ class CommentController extends Controller
                 $comment->delete();
                 return response()->json(['message' => 'Comment deleted successfully'], Response::HTTP_OK);
             } else {
-                // If not authorized, return a 403 Forbidden response with the appropriate message
                 return response()->json(['message' => $policyResp->message()], Response::HTTP_FORBIDDEN);
             }
         } catch (\Exception $e) {
@@ -102,7 +105,6 @@ class CommentController extends Controller
 
                 return response()->json(['message' => 'Comment updated successfully'], Response::HTTP_OK);
             } else {
-                // If not authorized, return a 403 Forbidden response with the appropriate message
                 return response()->json(['message' => $policyResp->message()], Response::HTTP_FORBIDDEN);
             }
         } catch (\Exception $e) {

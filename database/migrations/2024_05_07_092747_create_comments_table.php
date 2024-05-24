@@ -28,6 +28,13 @@ return new class extends Migration
                 ->constrained()
                 ->onUpdate('cascade')
                 ->onDelete('cascade');
+
+            // Add parent_id column to support nested comments
+            $table->foreignId('parent_id')
+                ->nullable()
+                ->constrained('comments')
+                ->onUpdate('cascade')
+                ->onDelete('cascade');
         });
     }
 

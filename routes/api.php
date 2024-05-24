@@ -38,12 +38,6 @@ Route::prefix('auth')->group(function () {
             Route::delete('/memory/{title}/comment/{id}', 'delete');
         });
 
-        Route::controller(ReplyController::class)->group(function () {
-            Route::post('/comment/{id}/reply', 'create');
-            Route::patch('/comment/{id}/reply/{replyId}', 'update');
-            Route::delete('/comment/{id}/reply/{replyId}', 'delete');
-        });
-
         Route::controller(FileController::class)->group(function () {
             Route::get('/file/{id}', 'show')->whereNumber('id');
             Route::delete('/file/{id}', 'delete')->whereNumber('id');
@@ -56,13 +50,6 @@ Route::prefix('auth')->group(function () {
             Route::delete('/url/{id}', 'delete')->whereNumber('id');
             Route::patch('/url/{id}', 'update')->whereNumber('id');
         });
-
-        // Route::controller(SearchController::class)->group(function () {
-        //     Route::get('/search/{category}/{keyword}', 'CategoryKeywordIndex');
-        //     Route::get('/search/{category}', 'CategoryOnlyIndex');
-        //     Route::get('/searchTitle/{title}', 'TitleIndex');
-        //     Route::get('/searchDate/{date}', 'DateIndex');
-        // });
 
         // ADMIN & profile owners
         Route::controller(UserController::class)->group(function () {

@@ -82,6 +82,7 @@ class RegisterController extends Controller
         $request->session()->regenerate();
 
         $firstName = $user->first_name;
-        return response()->json(['message' => "Registration successful! You can now login, $firstName!"], Response::HTTP_CREATED);
+        // return response()->json(['message' => "Registration successful! You can now login, $firstName!"], Response::HTTP_CREATED);
+        return response()->json(status: 201, data: ['user' => $user]);
     }
 }

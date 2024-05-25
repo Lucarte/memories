@@ -13,7 +13,7 @@ return Application::configure(basePath: dirname(__DIR__))
     )
     ->withMiddleware(function (Middleware $middleware) {
         $middleware->statefulApi();
-        // $middleware->trustHosts(['https//google.com']) // the url i choose to use for my App
+        // $middleware->trustHosts(['https//dosmemorias.com']) // the url I (eventually) choose to host my App
     })
     ->withExceptions(function (Exceptions $exceptions) {
         //

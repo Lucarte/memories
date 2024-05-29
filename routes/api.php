@@ -1,27 +1,19 @@
 <?php
 
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\UrlController;
+use App\Http\Controllers\AuthController;
 use App\Http\Controllers\FileController;
 use App\Http\Controllers\UserController;
-use App\Http\Controllers\LoginController;
-use App\Http\Controllers\ReplyController;
-use App\Http\Controllers\LogoutController;
 use App\Http\Controllers\MemoryController;
-use App\Http\Controllers\SearchController;
 use App\Http\Controllers\CommentController;
-use App\Http\Controllers\RegisterController;
 
-// All routes that deal with registration or login, or that need authentification will have the prefix 'auth'
 Route::prefix('auth')->group(function () {
-    // Public Endpoints
-    Route::post('/register', RegisterController::class);
-    Route::post('/login', LoginController::class);
+    Route::post('/register', [AuthController::class, 'register']);
+    Route::post('/login', [AuthController::class, 'login']);
 
-    // Secure Endpoints - needing authentication
     Route::controller()->middleware('auth:sanctum')->group(function () {
-        Route::post('/logout', LogoutController::class);
+        Route::post('/logout', [AuthController::class, 'logout']);
 
         Route::controller(MemoryController::class)->group(function () {
             Route::get('/memories', 'index');

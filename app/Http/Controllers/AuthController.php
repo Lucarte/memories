@@ -9,11 +9,13 @@ use Illuminate\Http\Response;
 use Illuminate\Validation\Rule;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rules\Password;
 
-class RegisterController extends Controller
+class AuthController extends Controller
 {
-    public function __invoke(Request $request)
+    // REGISTER
+    public function register(Request $request)
     {
         $request->validate([
             'firstName' => [
@@ -84,5 +86,49 @@ class RegisterController extends Controller
         $firstName = $user->first_name;
         // return response()->json(['message' => "Registration successful! You can now login, $firstName!"], Response::HTTP_CREATED);
         return response()->json(status: 201, data: ['user' => $user]);
+    }
+
+    // LOGIN
+    public function login(Request $request)
+    {
+        // Validate input
+        $validator = Validator::make($request->all(), [
+            'email' => 'required|email',
+            'password' => 'required',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'message' => 'Invalid data',
+                'errors' => $validator->errors(),
+            ]);
+        }
+
+        $credentials = [
+            'email' => $request->input('email'),
+            'password' => $request->input('password'),
+        ];
+
+        if (Auth::attempt($credentials)) {
+            $fan = Auth::user();
+            $firstName = $fan->first_name;
+
+            return response()->json(['fan' => $fan, 'message' => "Login successful, $firstName!"], Response::HTTP_OK);
+        } else {
+            // Authentication failed
+            return response()->json(['message' => 'Login failed'], Response::HTTP_UNAUTHORIZED);
+        }
+    }
+
+    // LOGOUT
+    public function logout(Request $request)
+    {
+        Auth::guard('web')->logout();
+        $request->session()->invalidate();
+        $request->session()->regenerateToken();
+
+        $user = Auth::user();
+        $firstName = $user->first_name;
+        return response()->json(['message' => "You have been logged out successfully, $firstName!"], Response::HTTP_OK);
     }
 }

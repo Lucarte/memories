@@ -11,7 +11,6 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 
 
-
 class User extends Authenticatable
 {
     use HasApiTokens, HasFactory, Notifiable;
@@ -91,8 +90,4 @@ class User extends Authenticatable
             'updated_at' =>  $this->updated_at,
         ];
     }
-
-    // $user = new User;
-
-
 }

@@ -21,13 +21,13 @@ class AuthController extends Controller
             'firstName' => [
                 'required',
                 'string',
-                'min:4',
+                'min:2',
                 'max:16',
             ],
             'lastName' => [
                 'required',
                 'string',
-                'min:4',
+                'min:2',
                 'max:16',
             ],
             'email' => [
@@ -63,7 +63,7 @@ class AuthController extends Controller
             'email' => $request->get('email'),
             'password' => Hash::make($request->get('password')),
             'relationship_to_kid' => $request->get('relationshipToKid'),
-            'terms' => $request->get('terms'),
+            'terms' => $request->get('terms') ? 1 : 0,
         ]);
 
         // Create avatar file
@@ -80,12 +80,11 @@ class AuthController extends Controller
             $avatar->save();
         }
 
-        Auth::login($user);
-        $request->session()->regenerate();
 
+        Auth::login($user);
         $firstName = $user->first_name;
-        // return response()->json(['message' => "Registration successful! You can now login, $firstName!"], Response::HTTP_CREATED);
-        return response()->json(status: 201, data: ['user' => $user]);
+        return response()->json(['message' => "Registration successful! You can now login, $firstName!"], Response::HTTP_CREATED);
+        // return response()->json(status: 201, data: ['user' => $user]);
     }
 
     // LOGIN
@@ -127,6 +126,7 @@ class AuthController extends Controller
         $request->session()->invalidate();
         $request->session()->regenerateToken();
 
+        // return response()->json(status: 204);
         $user = Auth::user();
         $firstName = $user->first_name;
         return response()->json(['message' => "You have been logged out successfully, $firstName!"], Response::HTTP_OK);

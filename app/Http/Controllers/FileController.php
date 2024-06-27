@@ -140,10 +140,7 @@ class FileController extends Controller
                     ]);
                 }
 
-                // Update file type if provided
-                if ($request->filled('file_type')) {
-                    $file->file_type = $request->input('file_type');
-                }
+
 
                 $file->save();
                 return response()->json(['message' => 'File updated successfully'], Response::HTTP_OK);

@@ -10,7 +10,6 @@ class File extends Model
     use Searchable;
 
     protected $fillable = [
-        'file_type',
         'file_path',
         'user_id',
         'memory_id',
@@ -24,7 +23,6 @@ class File extends Model
     public function toSearchableArray()
     {
         return [
-            'file_type' =>  $this->file_type,
             'file_path' =>  $this->file_path,
             'user_id' => (int) $this->user_id,
             'memory_id' => (int) $this->memory_id,

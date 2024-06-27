@@ -16,18 +16,21 @@ Route::prefix('auth')->group(function () {
         Route::post('/logout', [AuthController::class, 'logout']);
 
         Route::controller(MemoryController::class)->group(function () {
-            Route::get('/memories', 'index');
-            Route::get('/memory/{title}', 'show');
+            Route::get('/memories', 'getAllMemories');
+            Route::get('/memories/{title}', 'show');
             Route::get('/memories/{kid}', 'index');
-            Route::post('/memory', 'createWithFile');
-            Route::patch('/memory/{title}', 'update');
-            Route::delete('/memory/{title}', 'delete');
+            Route::post('/memory/create', 'createWithFile');
+            Route::patch('/memories/{title}', 'update');
+            Route::delete('/memories/{title}', 'delete');
+            // Route to fetch categories
+            Route::get('/categories', 'getCategories');
         });
+        Route::get('/categories', [MemoryController::class, 'getCategories']);
 
         Route::controller(CommentController::class)->group(function () {
-            Route::post('/memory/{title}/comment', 'create');
-            Route::patch('/memory/{title}/comment/{id}', 'update');
-            Route::delete('/memory/{title}/comment/{id}', 'delete');
+            Route::post('/memories/{title}/comment', 'create');
+            Route::patch('/memories/{title}/comment/{id}', 'update');
+            Route::delete('/memories/{title}/comment/{id}', 'delete');
         });
 
         Route::controller(FileController::class)->group(function () {

@@ -13,14 +13,14 @@ class MemoryPolicy
         return $user->isAdmin() ? true : null;
     }
 
-    public function index(User $user)
+    public function getAllMemories(User $user)
     {
-        return $user->id !== null ? Response::allow('MemoryPolicy - index - allowed') :  Response::deny('MemoryPolicy - index - denied');
+        return $user->id !== null ? Response::allow('MemoryPolicy - getAllMemories - allowed') :  Response::deny('MemoryPolicy - getAllMemories - denied');
     }
 
-    public function indexKid($kid, User $user)
+    public function index($kid, User $user)
     {
-        return $user->id !== null ? Response::allow('MemoryPolicy - indexKid - allowed') :  Response::deny('MemoryPolicy - indexKid - denied');
+        return $user->id !== null ? Response::allow('MemoryPolicy - index - allowed') :  Response::deny('MemoryPolicy - index - denied');
     }
 
     public function show(User $user)

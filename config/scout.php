@@ -149,7 +149,7 @@ return [
                 'sortableAttributes' => ['year', 'month'],
             ],
             File::class => [
-                'filterableAttributes' => ['id', 'file_type', 'file_path', 'user', 'memory', 'created_at', 'updated_at'],
+                'filterableAttributes' => ['id', 'file_path', 'user', 'memory', 'created_at', 'updated_at'],
                 'sortableAttributes' => ['updated_at', 'created_at'],
             ],
             Url::class => [

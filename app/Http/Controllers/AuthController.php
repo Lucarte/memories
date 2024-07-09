@@ -126,9 +126,30 @@ class AuthController extends Controller
         $request->session()->invalidate();
         $request->session()->regenerateToken();
 
-        // return response()->json(status: 204);
         $user = Auth::user();
         $firstName = $user->first_name;
         return response()->json(['message' => "You have been logged out successfully, $firstName!"], Response::HTTP_OK);
+    }
+
+    // STATUS - without id
+    // Does not work
+    // public function loginStatus()
+    // {
+    //     return response()->json(['loggedIn' => auth()->check()], 200);
+    // }
+
+    // STATUS - with id
+    public function loginStatus()
+    {
+        if (auth()->check()) {
+            return response()->json([
+                'loggedIn' => true,
+                'userId' => auth()->user()->id, 'isAdmin' => auth()->user()->is_admin,
+            ], 200);
+        } else {
+            return response()->json([
+                'loggedIn' => false,
+            ], 200);
+        }
     }
 }

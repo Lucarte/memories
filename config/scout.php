@@ -141,7 +141,7 @@ return [
         'key' => env('MEILISEARCH_KEY'),
         'index-settings' => [
             User::class => [
-                'filterableAttributes' => ['id', 'first_name', 'last_name', 'email', 'relationship_to_kid', 'avatarFile', 'created_at', 'updated_at'],
+                'filterableAttributes' => ['id', 'first_name', 'last_name', 'email', 'relationship_to_kid', 'avatar', 'created_at', 'updated_at'],
                 'sortableAttributes' => ['updated_at', 'created_at'],
             ],
             Memory::class => [

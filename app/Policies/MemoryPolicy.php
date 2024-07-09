@@ -28,18 +28,18 @@ class MemoryPolicy
         return $user->id !== null ? Response::allow('MemoryPolicy - show - allowed') : Response::deny('MemoryPolicy - show - denied');
     }
 
-    public function createWithFile()
+    public function createWithFile(User $user)
     {
-        return null;
+        return $user->isAdmin() ? Response::allow('MemoryPolicy - createWithFile - allowed') : Response::deny('MemoryPolicy - createWithFile - denied');
     }
 
-    public function delete()
+    public function delete(User $user)
     {
-        return null;
+        return $user->isAdmin() ? Response::allow('MemoryPolicy - delete - allowed') : Response::deny('MemoryPolicy - delete - denied');
     }
 
-    public function update()
+    public function update(User $user)
     {
-        return null;
+        return $user->isAdmin() ? Response::allow('MemoryPolicy - update - allowed') : Response::deny('MemoryPolicy - update - denied');
     }
 }

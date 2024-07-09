@@ -62,7 +62,7 @@ class User extends Authenticatable
         ];
     }
 
-    public function avatarFile()
+    public function avatar()
     {
         return $this->hasOne(Avatar::class);
     }
@@ -73,7 +73,7 @@ class User extends Authenticatable
     protected function makeAllSearchableUsing(Builder $query): Builder
     {
         return $query->with(
-            'avatarFile'
+            'avatar'
         );
     }
 
@@ -85,7 +85,7 @@ class User extends Authenticatable
             'last_name' =>  $this->last_name,
             'email' =>  $this->email,
             'relationship_to_kid' =>  $this->relationship_to_kid,
-            'avatarFile' =>  $this->avatarFile,
+            'avatar' =>  $this->avatar,
             'created_at' =>  $this->created_at,
             'updated_at' =>  $this->updated_at,
         ];

@@ -131,20 +131,18 @@ class AuthController extends Controller
         return response()->json(['message' => "You have been logged out successfully, $firstName!"], Response::HTTP_OK);
     }
 
-    // STATUS - without id
-    // Does not work
-    // public function loginStatus()
-    // {
-    //     return response()->json(['loggedIn' => auth()->check()], 200);
-    // }
-
     // STATUS - with id
     public function loginStatus()
     {
         if (auth()->check()) {
+            // Fetch user details
+            $user = auth()->user();
+
             return response()->json([
                 'loggedIn' => true,
-                'userId' => auth()->user()->id, 'isAdmin' => auth()->user()->is_admin,
+                'userId' => $user->id,
+                'isAdmin' => $user->is_admin,
+                'firstName' => $user->first_name,
             ], 200);
         } else {
             return response()->json([

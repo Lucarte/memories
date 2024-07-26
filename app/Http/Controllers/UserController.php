@@ -3,7 +3,6 @@
 namespace App\Http\Controllers;
 
 use Exception;
-use App\Models\File;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
@@ -22,8 +21,14 @@ class UserController extends Controller
             $policyResp = Gate::inspect('index', User::class);
 
             if ($policyResp->allowed()) {
-                // Retrieve the list of fans
-                $users = User::all();
+                // Retrieve the list of users (fans) with avatar paths
+                $users = User::with('avatar') // Ensure the avatar relationship is loaded
+                    ->get()
+                    ->map(function ($user) {
+                        // Ensure avatar_path is properly formatted for frontend consumption
+                        $user->avatar_path = $user->avatar ? url('storage/' . $user->avatar->avatar_path) : null;
+                        return $user;
+                    });
 
                 return response()->json(['message' => $policyResp->message(), 'users' => $users], Response::HTTP_OK);
             }
@@ -38,8 +43,8 @@ class UserController extends Controller
     public function getById(Request $request, int $id)
     {
         try {
-            // Find the User using their id
-            $user = User::where('id', $id)->first();
+            // Find the User using their id with avatar
+            $user = User::with('avatar')->where('id', $id)->first();
 
             if (!$user) {
                 return response()->json(['message' => 'User not found'], Response::HTTP_NOT_FOUND);
@@ -49,6 +54,9 @@ class UserController extends Controller
             $policyResp = Gate::inspect('getById', $user);
 
             if ($policyResp->allowed()) {
+                // Format avatar_path
+                $user->avatar_path = $user->avatar ? url('storage/' . $user->avatar->avatar_path) : null;
+
                 return response()->json(['user' => $user], Response::HTTP_OK);
             } else {
                 return response()->json(['message' => $policyResp->message()], Response::HTTP_FORBIDDEN);
@@ -142,6 +150,9 @@ class UserController extends Controller
                 $user->terms = $request->input('terms');
 
                 $user->save();
+
+                // Format avatar_path
+                $user->avatar_path = $user->avatar ? url('storage/' . $user->avatar->avatar_path) : null;
 
                 return response()->json(['user' => $user], Response::HTTP_OK);
             }

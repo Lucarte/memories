@@ -20,7 +20,9 @@ Route::prefix('auth')->group(function () {
         Route::controller(MemoryController::class)->group(function () {
             Route::get('/memories', 'getAllMemories');
             Route::get('/memories/title/{title}', 'show');
-            Route::get('/memories/kid/{kid}', 'index');
+            Route::get('/gabriella/memories', 'getGabriellasMemories');
+            Route::get('/pablo/memories', 'getPablosMemories');
+            Route::get('/brunnis/memories', 'getBrunnisMemories');
         });
 
         Route::controller(CommentController::class)->group(function () {

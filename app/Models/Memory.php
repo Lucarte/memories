@@ -9,8 +9,24 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 class Memory extends Model
 {
-    use HasFactory;
-    use Searchable;
+    use HasFactory, Searchable;
+
+    protected static function boot()
+    {
+        parent::boot();
+
+        static::created(function ($model) {
+            $model->searchable();
+        });
+
+        static::updated(function ($model) {
+            $model->searchable();
+        });
+
+        static::deleted(function ($model) {
+            $model->unsearchable();
+        });
+    }
 
     /**
      * The attributes that are mass assignable.
@@ -51,31 +67,25 @@ class Memory extends Model
      */
     protected function makeAllSearchableUsing(Builder $query): Builder
     {
-        return $query->with(
-            [
-                'files',
-                'categories',
-                'urls',
-                'user',
-            ]
-        );
+        return $query->with([
+            'files',
+            'categories',
+            'urls',
+            'user',
+        ]);
     }
 
     public function toSearchableArray()
     {
-        return [
-            'id' => (int) $this->id,
-            'user_id' => (int) $this->user_id,
-            'title' => $this->title,
-            'description' =>  $this->description,
-            'kid' =>  $this->kid,
-            'year' => (int)  $this->year,
-            'month' =>  $this->month,
-            'day' =>  (int) $this->day,
-            'categories' =>  $this->categories,
-            'files' =>  $this->files,
-            'urls' =>  $this->urls,
-            'user' =>  $this->user,
-        ];
+        // Customize the array returned to MeiliSearch
+        $array = $this->toArray();
+
+        // Ensure relationships are properly formatted
+        $array['user'] = $this->user ? $this->user->toArray() : null;
+        $array['files'] = $this->files ? $this->files->toArray() : [];
+        $array['categories'] = $this->categories ? $this->categories->toArray() : [];
+        $array['urls'] = $this->urls ? $this->urls->toArray() : [];
+
+        return $array;
     }
 }

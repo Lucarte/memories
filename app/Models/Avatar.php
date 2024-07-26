@@ -12,8 +12,26 @@ class Avatar extends Model
     use HasFactory;
     use Searchable;
 
+    protected static function boot()
+    {
+        parent::boot();
+
+        static::created(function ($model) {
+            $model->searchable();
+        });
+
+        static::updated(function ($model) {
+            $model->searchable();
+        });
+
+        static::deleted(function ($model) {
+            $model->unsearchable();
+        });
+    }
+
     protected $fillable = [
         'avatar_path',
+        'user_id',
     ];
 
     public function user()
@@ -31,8 +49,9 @@ class Avatar extends Model
     }
     public function toSearchableArray()
     {
-        return [
-            'avatar_path' =>  $this->avatar_path,
-        ];
+        $array = $this->toArray();
+        $array['user'] = $this->user ? $this->user->toArray() : null;
+
+        return $array;
     }
 }

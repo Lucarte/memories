@@ -22,10 +22,9 @@ class File extends Model
 
     public function toSearchableArray()
     {
-        return [
-            'file_path' =>  $this->file_path,
-            'user_id' => (int) $this->user_id,
-            'memory_id' => (int) $this->memory_id,
-        ];
+        $array = $this->toArray();
+        $array['memory'] = $this->memory ? $this->memory->toArray() : null;
+
+        return $array;
     }
 }

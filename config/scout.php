@@ -5,6 +5,7 @@ use App\Models\File;
 use App\Models\User;
 use App\Models\Avatar;
 use App\Models\Memory;
+use App\Models\Category;
 
 return [
 
@@ -160,7 +161,10 @@ return [
                 'filterableAttributes' => ['id', 'avatar_path', 'user', 'created_at', 'updated_at'],
                 'sortableAttributes' => ['updated_at', 'created_at'],
             ],
-            // Would I also need to do comments and replies? 
+            Category::class => [
+                'filterableAttributes' => ['id', 'category', 'created_at', 'updated_at'],
+                'sortableAttributes' => ['created_at', 'updated_at'],
+            ],
         ],
     ],
 

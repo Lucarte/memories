@@ -6,6 +6,7 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\FileController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\MemoryController;
+use App\Http\Controllers\SearchController;
 use App\Http\Controllers\CommentController;
 
 Route::prefix('auth')->group(function () {
@@ -23,6 +24,11 @@ Route::prefix('auth')->group(function () {
             Route::get('/gabriella/memories', 'getGabriellasMemories');
             Route::get('/pablo/memories', 'getPablosMemories');
             Route::get('/brunnis/memories', 'getBrunnisMemories');
+        });
+
+        Route::controller(SearchController::class)->group(function () {
+            Route::get('/search/category/{category}', 'searchByCategory');
+            Route::get('/search/date/{date}', 'searchByDate');
         });
 
         Route::controller(CommentController::class)->group(function () {

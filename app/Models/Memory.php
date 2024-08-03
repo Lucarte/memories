@@ -54,8 +54,9 @@ class Memory extends Model
 
     public function categories()
     {
-        return $this->belongsToMany(Category::class);
+        return $this->belongsToMany(Category::class, 'category_memory', 'memory_id', 'category_id');
     }
+
 
     public function urls()
     {

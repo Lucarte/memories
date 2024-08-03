@@ -146,7 +146,7 @@ return [
                 'sortableAttributes' => ['updated_at', 'created_at'],
             ],
             Memory::class => [
-                'filterableAttributes' => ['id', 'title', 'user_id', 'description', 'kid', 'categories', 'files', 'user', 'urls', 'created_at', 'updated_at'],
+                'filterableAttributes' => ['id', 'title', 'user_id', 'description', 'kid', 'categories', 'categories.category', 'files', 'user', 'urls', 'created_at', 'updated_at'],
                 'sortableAttributes' => ['year', 'month'],
             ],
             File::class => [

@@ -7,48 +7,27 @@ use Illuminate\Http\Response;
 
 class SearchController extends Controller
 {
-    public function CategoryKeywordIndex($category, $keyword)
+    // Search by category only
+    public function searchByCategory($category)
     {
-        $filter = ['categories.category = ' . $category];
+        // Define the filter for the category
+        $filter = ['categories.category = "' . $category . '"'];
 
-        $memories = Memory::search($keyword, function ($meilisearch, $query, $options) use ($filter) {
-            $options['filter'] = $filter;
-            return $meilisearch->search($query, $options);
-        })->get();
-
-        if ($memories->isEmpty()) {
-            return response()->json(['message' => 'No memories found for the specified category and keyword'], Response::HTTP_NOT_FOUND);
-        }
-
-        return response()->json(['results' => $memories], Response::HTTP_OK);
-    }
-
-    public function CategoryOnlyIndex($category)
-    {
-        $filter = ['categories.category = ' . $category];
-
+        // Perform the search on the 'Memory' model, filtering by category
         $memories = Memory::search('', function ($meilisearch, $query, $options) use ($filter) {
             $options['filter'] = $filter;
             return $meilisearch->search($query, $options);
         })->get();
 
+        // Check if any memories were found
         if ($memories->isEmpty()) {
             return response()->json(['message' => 'No memories found for the specified category'], Response::HTTP_NOT_FOUND);
         }
 
+        // Return the found memories
         return response()->json(['results' => $memories], Response::HTTP_OK);
     }
 
-    public function TitleIndex($title)
-    {
-        $memories = Memory::search($title)->get();
-
-        if ($memories->isEmpty()) {
-            return response()->json(['message' => 'No memories found with the specified title'], Response::HTTP_NOT_FOUND);
-        }
-
-        return response()->json(['results' => $memories], Response::HTTP_OK);
-    }
 
     public function DateIndex($date)
     {

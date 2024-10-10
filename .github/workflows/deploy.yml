@@ -3,7 +3,7 @@ name: Deploy to DigitalOcean
 on:
   push:
     branches:
-      - main  # Or the branch you want to trigger the deployment from
+      - main
 
 jobs:
   deploy:

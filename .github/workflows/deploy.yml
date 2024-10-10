@@ -16,8 +16,11 @@ jobs:
       - name: Set up SSH
         run: |
           eval $(ssh-agent -s)
-          echo "${{ secrets.DO_SSH_KEY }}" | tr -d '\r' | ssh-add - <<< ${{ secrets.DO_SSH_KEY }}
-          ssh-add - <<< "${{ secrets.SSH_PASSPHRASE }}"
+          echo "${{ secrets.DO_SSH_KEY }}" > /tmp/private_key
+          chmod 600 /tmp/private_key
+          ssh-add /tmp/private_key
+        env:
+          SSH_PASSPHRASE: ${{ secrets.SSH_PASSPHRASE }}
 
       - name: Deploy code to Droplet
         run: |

@@ -13,14 +13,10 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v2
 
-      - name: Set up SSH
-        run: |
-          eval $(ssh-agent -s)
-          echo "${{ secrets.DO_SSH_KEY }}" > /tmp/private_key
-          chmod 600 /tmp/private_key
-          ssh-add /tmp/private_key
-        env:
-          SSH_PASSPHRASE: ${{ secrets.SSH_PASSPHRASE }}
+      - name: Set up SSH agent
+        uses: webfactory/ssh-agent@v0.5.3
+        with:
+          ssh-private-key: ${{ secrets.DO_SSH_KEY }}
 
       - name: Deploy code to Droplet
         run: |

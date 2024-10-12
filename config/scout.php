@@ -138,7 +138,7 @@ return [
     */
 
     'meilisearch' => [
-        'host' => env('MEILISEARCH_HOST', 'http://localhost:7700'),
+        'host' => env('MEILISEARCH_HOST', 'http://104.248.123.220:7700'),
         'key' => env('MEILISEARCH_KEY'),
         'index-settings' => [
             User::class => [
@@ -184,14 +184,15 @@ return [
             'api_key' => env('TYPESENSE_API_KEY', 'xyz'),
             'nodes' => [
                 [
-                    'host' => env('TYPESENSE_HOST', 'localhost'),
+                    'host' => env('TYPESENSE_HOST', '104.248.123.220'),
                     'port' => env('TYPESENSE_PORT', '8108'),
                     'path' => env('TYPESENSE_PATH', ''),
                     'protocol' => env('TYPESENSE_PROTOCOL', 'http'),
                 ],
             ],
+            
             'nearest_node' => [
-                'host' => env('TYPESENSE_HOST', 'localhost'),
+                'host' => env('TYPESENSE_HOST', '104.248.123.220'),
                 'port' => env('TYPESENSE_PORT', '8108'),
                 'path' => env('TYPESENSE_PATH', ''),
                 'protocol' => env('TYPESENSE_PROTOCOL', 'http'),

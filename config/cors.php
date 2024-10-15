@@ -19,7 +19,7 @@ return [
 
     'allowed_methods' => ['*'],
 
-    'allowed_origins' => ['https://api-memories.vercel.app', 'https://mypearlsofgreatprice.vercel.app' ], 
+    'allowed_origins' => ['https://api.mypearlsofgreatprice.de', 'https://mypearlsofgreatprice.de' ], 
 
     // 'allowed_origins' => ['*'],
 

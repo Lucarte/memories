@@ -21,27 +21,27 @@ jobs:
           ssh-private-key: ${{ secrets.DO_SSH_KEY }}
 
       - name: Deploy code to Droplet
-      run: |
-        ssh -o StrictHostKeyChecking=no ${{ secrets.DO_USER }}@${{ secrets.DO_HOST }} << 'EOF'
-          set -e
-          cd /var/www/laravel
-          git fetch origin
-          git checkout main
-          git reset --hard origin/main
-          
-          if ! composer install --no-interaction --prefer-dist; then
-            echo "Composer install failed!"
-            exit 1
-          fi
-      
-          if ! php artisan migrate --force; then
-            echo "Migration failed!"
-            exit 1
-          fi
-      
-          php artisan config:clear
-          php artisan cache:clear
-          php artisan config:cache
-          
-          sudo systemctl restart nginx
-        EOF
+        run: |
+          ssh -o StrictHostKeyChecking=no ${{ secrets.DO_USER }}@${{ secrets.DO_HOST }} << 'EOF'
+            set -e
+            cd /var/www/laravel
+            git fetch origin
+            git checkout main
+            git reset --hard origin/main
+            
+            if ! composer install --no-interaction --prefer-dist; then
+              echo "Composer install failed!"
+              exit 1
+            fi
+        
+            if ! php artisan migrate --force; then
+              echo "Migration failed!"
+              exit 1
+            fi
+        
+            php artisan config:clear
+            php artisan cache:clear
+            php artisan config:cache
+            
+            sudo systemctl restart nginx
+          EOF

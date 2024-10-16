@@ -13,7 +13,7 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v3.5.1  # Using the latest version
+        uses: actions/checkout@v3.5.1  # Use the latest version
 
       - name: Set up SSH agent
         uses: webfactory/ssh-agent@v0.7.0  # Ensure this is the latest version

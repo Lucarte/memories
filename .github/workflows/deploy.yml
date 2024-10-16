@@ -3,7 +3,7 @@ name: Deploy to DigitalOcean
 on:
   push:
     branches:
-      - main  # or name of the branch you want to trigger the deploy
+      - main  # or the name of the branch you want to trigger the deploy
 
 jobs:
   deploy:
@@ -11,10 +11,10 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3  # Updated to v3
 
       - name: Set up SSH agent
-        uses: webfactory/ssh-agent@v0.5.3
+        uses: webfactory/ssh-agent@v0.6.0  # Updated to v0.6.0
         with:
           ssh-private-key: ${{ secrets.DO_SSH_KEY }}
 

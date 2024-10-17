@@ -18,6 +18,8 @@ return [
     'stateful' => explode(',', env('SANCTUM_STATEFUL_DOMAINS', sprintf(
         '%s%s',
         '104.248.123.220',
+        'localhost',
+        'api.mypearlsofgreatprice.de',
         Sanctum::currentApplicationUrlWithPort()
     ))),
 

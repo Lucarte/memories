@@ -71,7 +71,7 @@ jobs:
             fi
             
             echo "Restarting Nginx..."
-            if ! systemctl restart nginx; then
+            if ! sudo systemctl restart nginx.service; then
               echo "Nginx restart failed!"
               exit 1
             fi

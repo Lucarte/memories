@@ -23,25 +23,58 @@ jobs:
       - name: Deploy code to Droplet
         run: |
           ssh -o StrictHostKeyChecking=no ${{ secrets.DO_USER }}@${{ secrets.DO_HOST }} << 'EOF'
-            set -e
-            cd /var/www/laravel
-            git fetch origin
-            git checkout main
-            git reset --hard origin/main
+            set -e  # Exit immediately if a command exits with a non-zero status
+            cd /var/www/laravel || { echo "Directory not found"; exit 1; }
+
+            echo "Fetching the latest code..."
+            if ! git fetch origin; then
+              echo "Git fetch failed!"
+              exit 1
+            fi
+
+            echo "Checking out the main branch..."
+            if ! git checkout main; then
+              echo "Git checkout failed!"
+              exit 1
+            fi
+
+            echo "Resetting to the latest code..."
+            if ! git reset --hard origin/main; then
+              echo "Git reset failed!"
+              exit 1
+            fi
             
+            echo "Installing composer dependencies..."
             if ! composer install --no-interaction --prefer-dist; then
               echo "Composer install failed!"
               exit 1
             fi
         
+            echo "Running migrations..."
             if ! php artisan migrate --force; then
               echo "Migration failed!"
               exit 1
             fi
         
-            php artisan config:clear
-            php artisan cache:clear
-            php artisan config:cache
+            echo "Clearing and caching configurations..."
+            if ! php artisan config:clear; then
+              echo "Config clear failed!"
+              exit 1
+            fi
+            if ! php artisan cache:clear; then
+              echo "Cache clear failed!"
+              exit 1
+            fi
+            if ! php artisan config:cache; then
+              echo "Config cache failed!"
+              exit 1
+            fi
             
-            systemctl restart nginx  # Restart Nginx without sudo
+            echo "Restarting Nginx..."
+            if ! systemctl restart nginx; then
+              echo "Nginx restart failed!"
+              exit 1
+            fi
+            
+            echo "Deployment successful!"
           EOF

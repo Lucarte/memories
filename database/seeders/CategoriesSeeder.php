@@ -36,7 +36,6 @@ class CategoriesSeeder extends Seeder
             'Cold Plunges',
             'Primary School',
             'Around-the-World',
-            'Turnen',
         ];
 
         foreach ($categories as $category) {

@@ -1,5 +1,4 @@
 <?php
-
 namespace App\Http\Controllers;
 
 use Exception;
@@ -22,13 +21,7 @@ class UserController extends Controller
 
             if ($policyResp->allowed()) {
                 // Retrieve the list of users (fans) with avatar paths
-                $users = User::with('avatar') // Ensure the avatar relationship is loaded
-                    ->get()
-                    ->map(function ($user) {
-                        // Ensure avatar_path is properly formatted for frontend consumption
-                        $user->avatar_path = $user->avatar ? url('storage/' . $user->avatar->avatar_path) : null;
-                        return $user;
-                    });
+                $users = User::with('avatar')->get();
 
                 return response()->json(['message' => $policyResp->message(), 'users' => $users], Response::HTTP_OK);
             }
@@ -55,7 +48,7 @@ class UserController extends Controller
 
             if ($policyResp->allowed()) {
                 // Format avatar_path
-                $user->avatar_path = $user->avatar ? url('storage/' . $user->avatar->avatar_path) : null;
+                $user->avatar_path = $user->avatar ? $this->getAvatarUrl($user->avatar->avatar_path) : null;
 
                 return response()->json(['user' => $user], Response::HTTP_OK);
             } else {
@@ -152,7 +145,7 @@ class UserController extends Controller
                 $user->save();
 
                 // Format avatar_path
-                $user->avatar_path = $user->avatar ? url('storage/' . $user->avatar->avatar_path) : null;
+                $user->avatar_path = $user->avatar ? $this->getAvatarUrl($user->avatar->avatar_path) : null;
 
                 return response()->json(['user' => $user], Response::HTTP_OK);
             }
@@ -161,5 +154,12 @@ class UserController extends Controller
         } catch (Exception $e) {
             return response()->json(['message' => '===FATAL=== ' . $e->getMessage()], Response::HTTP_INTERNAL_SERVER_ERROR);
         }
+    }
+
+    // Helper function to get the avatar URL
+    protected function getAvatarUrl($avatarPath)
+    {
+        // Change this to your DigitalOcean Spaces URL format
+        return 'https://memoriesbucket.fra1.digitaloceanspaces.com/' . $avatarPath; // Adjust the URL as needed
     }
 }

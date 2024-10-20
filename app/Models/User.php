@@ -30,6 +30,8 @@ class User extends Authenticatable
         'remember_token',
     ];
 
+    protected $appends = ['avatar_path']; // Append avatar_path
+
     protected function casts(): array
     {
         return [
@@ -46,6 +48,12 @@ class User extends Authenticatable
     public function avatar()
     {
         return $this->hasOne(Avatar::class);
+    }
+    
+    // Add the accessor for avatar_path
+    public function getAvatarPathAttribute()
+    {
+        return $this->avatar ? url('storage/' . $this->avatar->avatar_path) : null;
     }
 
     protected function makeAllSearchableUsing(Builder $query): Builder

@@ -71,7 +71,7 @@ class AuthController extends Controller
             $uploadedAvatar = $request->file('avatar_path');
             $extension = $uploadedAvatar->getClientOriginalExtension();
             $name = $user->first_name;
-            $path = $uploadedAvatar->storeAs('avatars', time() . '_' . $name . '-' . 'avatar' . '.' . $extension, 'public');
+            $path = $uploadedAvatar->storeAs('avatars', time() . '_' . $name . '-' . 'avatar' . '.' . $extension, 'spaces');
 
             // Create new avatar associated with this user
             $avatar = new Avatar();
@@ -84,7 +84,6 @@ class AuthController extends Controller
         Auth::login($user);
         $firstName = $user->first_name;
         return response()->json(['message' => "Registration successful! You can now login, $firstName!"], Response::HTTP_CREATED);
-        // return response()->json(status: 201, data: ['user' => $user]);
     }
 
     // LOGIN

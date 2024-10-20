@@ -13,7 +13,7 @@ return [
     |
     */
 
-    'default' => env('FILESYSTEM_DISK', 'local'),
+    'default' => env('FILESYSTEM_DISK', 'spaces'), // Change this to 'spaces' if you want it to be the default
 
     /*
     |--------------------------------------------------------------------------
@@ -41,6 +41,19 @@ return [
             'root' => storage_path('app/public'),
             'url' => env('APP_URL').'/storage',
             'visibility' => 'public',
+            'throw' => false,
+        ],
+
+        // Add this section for DigitalOcean Spaces
+        'spaces' => [
+            'driver' => 's3',
+            'key' => env('AWS_ACCESS_KEY_ID'),
+            'secret' => env('AWS_SECRET_ACCESS_KEY'),
+            'region' => env('AWS_DEFAULT_REGION'), // e.g., 'fra1'
+            'bucket' => env('AWS_BUCKET'), // e.g., 'memoriesbucket'
+            'url' => env('AWS_ENDPOINT'), // e.g., 'https://fra1.digitaloceanspaces.com'
+            'endpoint' => env('AWS_ENDPOINT'), // e.g., 'https://fra1.digitaloceanspaces.com'
+            'use_path_style_endpoint' => env('AWS_USE_PATH_STYLE_ENDPOINT', false),
             'throw' => false,
         ],
 

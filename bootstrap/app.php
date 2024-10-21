@@ -12,8 +12,12 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware) {
-        $middleware->statefulApi();
-        // $middleware->trustHosts(['https//dosmemorias.com']) // the url I (eventually) choose to host my App
+        // $middleware->statefulApi();
+        $middleware->trustHosts([
+            'https://mypearlsofgreatprice.de',
+            'https://api.mypearlsofgreatprice.de',
+        ]);
+        
     })
     ->withExceptions(function (Exceptions $exceptions) {
         //

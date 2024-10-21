@@ -138,7 +138,7 @@ return [
     */
 
     'meilisearch' => [
-        'host' => env('MEILISEARCH_HOST', 'http://104.248.123.220:7700'),
+        'host' => env('MEILISEARCH_HOST', 'https://104.248.123.220:7700'),
         'key' => env('MEILISEARCH_KEY'),
         'index-settings' => [
             User::class => [

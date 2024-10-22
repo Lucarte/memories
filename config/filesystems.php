@@ -47,13 +47,13 @@ return [
         // Add this section for DigitalOcean Spaces
         'spaces' => [
             'driver' => 's3',
-            'key' => env('AWS_ACCESS_KEY_ID'),
-            'secret' => env('AWS_SECRET_ACCESS_KEY'),
-            'region' => env('AWS_DEFAULT_REGION'), // e.g., 'fra1'
-            'bucket' => env('AWS_BUCKET'), // e.g., 'memoriesbucket'
-            'url' => env('AWS_ENDPOINT'), // e.g., 'https://fra1.digitaloceanspaces.com'
-            'endpoint' => env('AWS_ENDPOINT'), // e.g., 'https://fra1.digitaloceanspaces.com'
-            'use_path_style_endpoint' => env('AWS_USE_PATH_STYLE_ENDPOINT', false),
+            'key' => env('DO_SPACES_ACCESS_KEY_ID'),
+            'secret' => env('DO_SPACES_SECRET_ACCESS_KEY'),
+            'region' => env('DO_SPACES_DEFAULT_REGION'),
+            'bucket' => env('DO_SPACES_BUCKET'),
+            'url' => env('DO_SPACES_ENDPOINT'), 
+            'endpoint' => env('DO_SPACES_ENDPOINT'),
+            'use_path_style_endpoint' => env('DO_SPACES_USE_PATH_STYLE_ENDPOINT', false),
             'throw' => false,
         ],
 

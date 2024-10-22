@@ -155,11 +155,11 @@ class UserController extends Controller
             return response()->json(['message' => '===FATAL=== ' . $e->getMessage()], Response::HTTP_INTERNAL_SERVER_ERROR);
         }
     }
-
+    
     // Helper function to get the avatar URL
-    protected function getAvatarUrl($avatarPath)
-    {
-        // Change this to your DigitalOcean Spaces URL format
-        return 'https://memoriesbucket.fra1.digitaloceanspaces.com/' . $avatarPath; // Adjust the URL as needed
-    }
+protected function getAvatarUrl($avatarPath)
+{
+    return env('DO_SPACES_ENDPOINT') . '/' . env('DO_SPACES_BUCKET') . '/' . $avatarPath;
+}
+
 }

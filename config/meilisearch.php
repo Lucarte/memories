@@ -1,6 +1,6 @@
 <?php
 
 return [
-    'host' => env('MEILISEARCH_HOST', 'http://104.248.123.220:7700'),
-    'key' => env('MEILISEARCH_MASTER_KEY', null),
+    'host' => env('MEILISEARCH_HOST', 'https://meilisearch.mypearlsofgreatprice.de'),
+    'key' => env('MEILISEARCH_API_KEY', null),
 ];

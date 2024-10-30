@@ -2,16 +2,22 @@
 
 namespace App\Http\Controllers;
 
+use FFMpeg;
+use Imagick;
 use App\Models\Url;
 use App\Models\File;
 use App\Models\Memory;
 use App\Models\Category;
+use FFMpeg\Format\Audio\Mp3;
 use Illuminate\Http\Request;
-use Illuminate\Http\Response;
+// use Illuminate\Http\Response;
+use FFMpeg\Format\Video\X264;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Gate;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
+use Symfony\Component\HttpFoundation\Response;
 
 class MemoryController extends Controller
 {
@@ -31,7 +37,7 @@ class MemoryController extends Controller
             return response()->json(['message' => 'Error fetching categories: ' . $e->getMessage()], Response::HTTP_INTERNAL_SERVER_ERROR);
         }
     }
-
+    
     public function createWithFile(Request $request)
     {
         try {
@@ -44,7 +50,7 @@ class MemoryController extends Controller
                 'month' => 'nullable|string|min:3|max:9',
                 'day' => 'nullable|integer|min:1|max:31',
                 'image_paths' => 'nullable|array|max:10',
-                'image_paths.*' => 'nullable|file|mimes:jpeg,jpg,png,gif,svg|max:3145728',
+                'image_paths.*' => 'nullable|file|mimes:jpeg,jpg,png,gif,svg,heic|max:3145728',
                 'audio_paths' => 'nullable|array|max:10',
                 'audio_paths.*' => 'nullable|file|mimes:aiff,mpeg,m4a,mp3|max:20971520',
                 'video_paths' => 'nullable|array|max:10',
@@ -54,13 +60,13 @@ class MemoryController extends Controller
                 'category_ids' => 'required|array',
                 'category_ids.*' => 'exists:categories,id',
             ];
-
+    
             $validator = Validator::make($request->all(), $rules);
-
+    
             if ($validator->fails()) {
                 return response()->json(['message' => $validator->errors()], Response::HTTP_BAD_REQUEST);
             }
-
+    
             // Create a new memory instance
             $memory = new Memory();
             $memory->user_id = Auth::id();
@@ -71,30 +77,45 @@ class MemoryController extends Controller
             $memory->month = $request->input('month');
             $memory->day = $request->input('day');
             $memory->save();
-
+    
             // Handle categories
             $memory->categories()->sync($request->input('category_ids'));
-
+    
             // Handle multiple file uploads
             $filePaths = ['image_paths', 'audio_paths', 'video_paths'];
-
+    
             foreach ($filePaths as $fileType) {
                 if ($request->hasFile($fileType) && is_array($request->file($fileType))) {
-                    foreach ($request->file($fileType) as $index => $uploadedFile) {
+                    foreach ($request->file($fileType) as $uploadedFile) {
                         $extension = $uploadedFile->getClientOriginalExtension();
                         $title = $memory->title;
-                        $path = $uploadedFile->storeAs('uploads', time() . '_' . $title . '.' . $extension, 'spaces');
-
+                        $originalPath = $uploadedFile->storeAs('uploads', time() . '_' . $title . '.' . $extension, 'spaces');
+    
                         // Create a new file associated with this memory
                         $file = new File();
                         $file->user_id = Auth::id();
                         $file->memory_id = $memory->id;
-                        $file->file_path = $path;
+                        $file->file_path = $originalPath;
                         $file->save();
+    
+                        // Transcode videos
+                        if (in_array($extension, ['mp4', 'avi', 'quicktime', 'mpeg', 'mov'])) {
+                            $this->transcodeVideo(storage_path('app/' . $originalPath), $memory->id);
+                        }
+    
+                        // Convert audio formats
+                        if (in_array($extension, ['aiff', 'mpeg', 'm4a', 'mp3'])) {
+                            $this->transcodeAudio(storage_path('app/' . $originalPath), $memory->id);
+                        }
+    
+                        // Convert HEIC to JPEG
+                        if ($extension === 'heic') {
+                            $this->convertHeicToJpeg(storage_path('app/' . $originalPath), $memory->id);
+                        }
                     }
                 }
             }
-
+    
             // Handle URLs
             if ($request->filled('urls')) {
                 // Split the comma-separated URLs into an array
@@ -106,14 +127,59 @@ class MemoryController extends Controller
                     $url->save();
                 }
             }
-
+    
             // Return success response
             return response()->json(['message' => 'Memory created successfully!'], Response::HTTP_CREATED);
         } catch (\Exception $e) {
             return response()->json(['message' => '===FATAL=== ' . $e->getMessage()], Response::HTTP_INTERNAL_SERVER_ERROR);
         }
     }
-
+    
+    private function transcodeVideo($path, $memoryId)
+    {
+        $ffmpeg = FFMpeg\FFMpeg::create();
+        $video = $ffmpeg->open($path);
+        $outputPath = 'uploads/converted-video-' . $memoryId . '.mp4';
+        $video->save(new FFMpeg\Format\Video\X264(), storage_path('app/' . $outputPath));
+    
+        // Save the transcoded file record
+        $file = new File();
+        $file->user_id = Auth::id();
+        $file->memory_id = $memoryId;
+        $file->file_path = $outputPath;
+        $file->save();
+    }
+    
+    private function transcodeAudio($path, $memoryId)
+    {
+        $ffmpeg = FFMpeg\FFMpeg::create();
+        $audio = $ffmpeg->open($path);
+        $outputPath = 'uploads/converted-audio-' . $memoryId . '.mp3';
+        $audio->save(new FFMpeg\Format\Audio\Mp3(), storage_path('app/' . $outputPath));
+    
+        // Save the transcoded file record
+        $file = new File();
+        $file->user_id = Auth::id();
+        $file->memory_id = $memoryId;
+        $file->file_path = $outputPath;
+        $file->save();
+    }
+    
+    private function convertHeicToJpeg($path, $memoryId)
+    {
+        $imagick = new \Imagick($path);
+        $outputPath = 'uploads/converted-image-' . $memoryId . '.jpg';
+        $imagick->setImageFormat('jpeg');
+        $imagick->writeImage(storage_path('app/' . $outputPath));
+    
+        // Save the converted file record
+        $file = new File();
+        $file->user_id = Auth::id();
+        $file->memory_id = $memoryId;
+        $file->file_path = $outputPath;
+        $file->save();
+    }
+    
     public function delete(string $title)
     {
         try {

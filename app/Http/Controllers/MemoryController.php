@@ -137,6 +137,8 @@ class MemoryController extends Controller
     
     private function transcodeVideo($path, $memoryId)
     {
+        \Log::info("Transcoding video at: " . $path);
+
         $ffmpeg = FFMpeg\FFMpeg::create();
         $video = $ffmpeg->open($path);
         $outputPath = 'uploads/converted-video-' . $memoryId . '.mp4';

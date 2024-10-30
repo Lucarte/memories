@@ -138,8 +138,9 @@ return [
     */
 
     'meilisearch' => [
-        'host' => env('MEILISEARCH_HOST', 'https://104.248.123.220:7700'),
-        'key' => env('MEILISEARCH_KEY'),
+        'host' => env('MEILISEARCH_HOST', 'https://meilisearch.mypearlsofgreatprice.de'), // Use the environment variable here
+        'key' => env('MEILISEARCH_MASTER_KEY'), // Use the MEILISEARCH_MASTER_KEY directly if that's what your MeiliSearch instance requires
+    
         'index-settings' => [
             User::class => [
                 'filterableAttributes' => ['id', 'first_name', 'last_name', 'email', 'relationship_to_kid', 'avatar', 'created_at', 'updated_at'],

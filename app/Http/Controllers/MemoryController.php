@@ -182,25 +182,30 @@ class MemoryController extends Controller
     {
         $ffmpeg = FFMpeg::create();
         $audio = $ffmpeg->open($path);
-        
+    
         // Define a temporary local path to save the converted audio file
         $tempPath = 'converted-audio-' . $memoryId . '.mp3';
         $audio->save(new Mp3(), storage_path('app/' . $tempPath));
-        
+    
         // Upload to DigitalOcean Spaces
         $outputPath = 'uploads/converted-audio-' . $memoryId . '.mp3';
-        Storage::disk('spaces')->put($outputPath, fopen(storage_path('app/' . $tempPath), 'r+'), 'public');
-        
+        $uploaded = Storage::disk('spaces')->put($outputPath, fopen(storage_path('app/' . $tempPath), 'r+'), 'public');
+    
         // Delete the local temporary file
         unlink(storage_path('app/' . $tempPath));
     
-        // Save the DigitalOcean Spaces file path in the database
-        $file = new File();
-        $file->user_id = Auth::id();
-        $file->memory_id = $memoryId;
-        $file->file_path = $outputPath;
-        $file->save();
+        if ($uploaded) {
+            // Save the DigitalOcean Spaces file path in the database
+            $file = new File();
+            $file->user_id = Auth::id();
+            $file->memory_id = $memoryId;
+            $file->file_path = $outputPath;
+            $file->save();
+        } else {
+            Log::error('Failed to upload transcoded audio to DigitalOcean Spaces.');
+        }
     }
+    
 
     private function convertHeicToJpeg($path, $memoryId)
     {
@@ -352,145 +357,4 @@ class MemoryController extends Controller
             return response()->json(['message' => 'An error occurred: ' . $e->getMessage()], Response::HTTP_INTERNAL_SERVER_ERROR);
         }
     }
-
-    public function update(Request $request, int $id)
-    {
-        try {
-            // Log the incoming request data
-            Log::info('Update Memory Request Data:', $request->all());
-
-            // Find the memory by ID
-            $memory = Memory::where('id', $id)->first();
-
-            if (!$memory) {
-                return response()->json(['message' => 'Memory not found'], Response::HTTP_NOT_FOUND);
-            }
-
-            // Authorization check
-            $policyResp = Gate::inspect('update', $memory);
-            if (!$policyResp->allowed()) {
-                return response()->json(['message' => $policyResp->message()], Response::HTTP_FORBIDDEN);
-            }
-
-            // Define validation rules
-            $rules = [
-                'title' => 'required|string|max:255',
-                'description' => 'required|string|max:2000',
-                'kid' => 'required|string|min:4|max:9',
-                'year' => 'required|integer|min:1900|max:2200',
-                'month' => 'nullable|string|min:3|max:9',
-                'day' => 'nullable|integer|min:1|max:31',
-                'image_paths' => 'nullable|array|max:10',
-                'image_paths.*' => 'nullable|file|mimes:jpeg,jpg,png,gif,svg|max:3145728',
-                'audio_paths' => 'nullable|array|max:10',
-                'audio_paths.*' => 'nullable|file|mimes:aiff,mpeg,m4a,mp3|max:20971520',
-                'video_paths' => 'nullable|array|max:10',
-                'video_paths.*' => 'nullable|file|mimes:mp4,avi,quicktime,mpeg,mov|max:209715200',
-                'urls' => 'nullable|string',
-                'urls.*' => 'nullable|url',
-                'category_ids' => 'required|array',
-                'category_ids.*' => 'exists:categories,id',
-            ];
-
-            // Validate the request data
-            $validator = Validator::make($request->all(), $rules);
-
-            if ($validator->fails()) {
-                return response()->json(['message' => $validator->errors()], Response::HTTP_BAD_REQUEST);
-            }
-
-            // Update the memory instance
-            $memory->title = $request->input('title');
-            $memory->description = $request->input('description');
-            $memory->kid = $request->input('kid');
-            $memory->year = $request->input('year');
-            $memory->month = $request->input('month');
-            $memory->day = $request->input('day');
-            $memory->save();
-
-            // Ensure category_ids is an array
-            $categoryIds = $request->input('category_ids', []);
-
-            // Associate categories with the memory
-            $memory->categories()->sync($categoryIds);
-
-            // Return success response
-            return response()->json(['message' => 'Memory updated successfully!'], Response::HTTP_OK);
-        } catch (\Exception $e) {
-            // Log the exception
-            Log::error('===FATAL=== ' . $e->getMessage());
-            return response()->json(['message' => '===FATAL=== ' . $e->getMessage()], Response::HTTP_INTERNAL_SERVER_ERROR);
-        }
-    }
-
-    // public function update(Request $request, int $id)
-    // {
-    //     try {
-    //         // Log the incoming request data
-    //         Log::info('Update Memory Request Data:', $request->all());
-
-    //         // Find the memory by title
-    //         $memory = Memory::where('id', $id)->first();
-
-    //         if (!$memory) {
-    //             return response()->json(['message' => 'Memory not found'], Response::HTTP_NOT_FOUND);
-    //         }
-
-    //         // Authorization check
-    //         $policyResp = Gate::inspect('update', $memory);
-
-    //         // Dump and die to see the policy response
-    //         // dd($policyResp);
-
-    //         if (!$policyResp->allowed()) {
-    //             return response()->json(['message' => $policyResp->message()], Response::HTTP_FORBIDDEN);
-    //         }
-
-    //         // Define validation rules
-    //         $rules = [
-    //             'title' => 'required|string|max:255',
-    //             'description' => 'required|string|max:2000',
-    //             'kid' => 'required|string|min:4|max:9',
-    //             'year' => 'required|integer|min:1900|max:2200',
-    //             'month' => 'nullable|string|min:3|max:9',
-    //             'day' => 'nullable|integer|min:1|max:31',
-    //             'image_paths' => 'nullable|array|max:10',
-    //             'image_paths.*' => 'nullable|file|mimes:jpeg,jpg,png,gif,svg|max:3145728',
-    //             'audio_paths' => 'nullable|array|max:10',
-    //             'audio_paths.*' => 'nullable|file|mimes:aiff,mpeg,m4a,mp3|max:20971520',
-    //             'video_paths' => 'nullable|array|max:10',
-    //             'video_paths.*' => 'nullable|file|mimes:mp4,avi,quicktime,mpeg,mov|max:209715200',
-    //             'urls' => 'nullable|string',
-    //             'urls.*' => 'nullable|url',
-    //             'category_ids' => 'required|array',
-    //             'category_ids.*' => 'exists:categories,id',
-    //         ];
-
-    //         // Validate the request data
-    //         $validator = Validator::make($request->all(), $rules);
-
-    //         if ($validator->fails()) {
-    //             return response()->json(['message' => $validator->errors()], Response::HTTP_BAD_REQUEST);
-    //         }
-
-    //         // Update the memory instance
-    //         $memory->title = $request->input('title');
-    //         $memory->description = $request->input('description');
-    //         $memory->kid = $request->input('kid');
-    //         $memory->year = $request->input('year');
-    //         $memory->month = $request->input('month');
-    //         $memory->day = $request->input('day');
-    //         $memory->save();
-
-    //         // Associate categories with the memory
-    //         $memory->categories()->sync($request->input('category_ids'));
-
-    //         // Return success response
-    //         return response()->json(['message' => 'Memory updated successfully!'], Response::HTTP_OK);
-    //     } catch (\Exception $e) {
-    //         // Log the exception
-    //         Log::error('===FATAL=== ' . $e->getMessage());
-    //         return response()->json(['message' => '===FATAL=== ' . $e->getMessage()], Response::HTTP_INTERNAL_SERVER_ERROR);
-    //     }
-    // }
 }

@@ -2,15 +2,14 @@
 
 namespace App\Http\Controllers;
 
-use FFMpeg;
 use Imagick;
+use FFMpeg\FFMpeg;
 use App\Models\Url;
 use App\Models\File;
 use App\Models\Memory;
 use App\Models\Category;
 use FFMpeg\Format\Audio\Mp3;
 use Illuminate\Http\Request;
-// use Illuminate\Http\Response;
 use FFMpeg\Format\Video\X264;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Auth;
@@ -137,14 +136,25 @@ class MemoryController extends Controller
     
     private function transcodeVideo($path, $memoryId)
     {
-        \Log::info("Transcoding video at: " . $path);
-
-        $ffmpeg = FFMpeg\FFMpeg::create();
+        $ffmpeg = FFMpeg::create();
         $video = $ffmpeg->open($path);
+        
+        // Define the output format with quality control
+        $outputFormat = new X264();
+        $outputFormat->setKiloBitrate(1000)->setAudioKiloBitrate(128);
+        
+        // Define a temporary local path to save the converted video
+        $tempPath = 'converted-video-' . $memoryId . '.mp4';
+        $video->save($outputFormat, storage_path('app/' . $tempPath));
+        
+        // Upload to DigitalOcean Spaces
         $outputPath = 'uploads/converted-video-' . $memoryId . '.mp4';
-        $video->save(new FFMpeg\Format\Video\X264(), storage_path('app/' . $outputPath));
+        Storage::disk('spaces')->put($outputPath, fopen(storage_path('app/' . $tempPath), 'r+'), 'public');
+        
+        // Delete the local temporary file
+        unlink(storage_path('app/' . $tempPath));
     
-        // Save the transcoded file record
+        // Save the DigitalOcean Spaces file path in the database
         $file = new File();
         $file->user_id = Auth::id();
         $file->memory_id = $memoryId;
@@ -154,33 +164,52 @@ class MemoryController extends Controller
     
     private function transcodeAudio($path, $memoryId)
     {
-        $ffmpeg = FFMpeg\FFMpeg::create();
+        $ffmpeg = FFMpeg::create();
         $audio = $ffmpeg->open($path);
+        
+        // Define a temporary local path to save the converted audio file
+        $tempPath = 'converted-audio-' . $memoryId . '.mp3';
+        $audio->save(new Mp3(), storage_path('app/' . $tempPath));
+        
+        // Upload to DigitalOcean Spaces
         $outputPath = 'uploads/converted-audio-' . $memoryId . '.mp3';
-        $audio->save(new FFMpeg\Format\Audio\Mp3(), storage_path('app/' . $outputPath));
+        Storage::disk('spaces')->put($outputPath, fopen(storage_path('app/' . $tempPath), 'r+'), 'public');
+        
+        // Delete the local temporary file
+        unlink(storage_path('app/' . $tempPath));
     
-        // Save the transcoded file record
+        // Save the DigitalOcean Spaces file path in the database
         $file = new File();
         $file->user_id = Auth::id();
         $file->memory_id = $memoryId;
         $file->file_path = $outputPath;
         $file->save();
     }
-    
+
     private function convertHeicToJpeg($path, $memoryId)
     {
         $imagick = new \Imagick($path);
-        $outputPath = 'uploads/converted-image-' . $memoryId . '.jpg';
+        
+        // Define a temporary local path to save the converted JPEG file
+        $tempPath = 'converted-image-' . $memoryId . '.jpg';
         $imagick->setImageFormat('jpeg');
-        $imagick->writeImage(storage_path('app/' . $outputPath));
-    
-        // Save the converted file record
+        $imagick->writeImage(storage_path('app/' . $tempPath));
+
+        // Upload to DigitalOcean Spaces
+        $outputPath = 'uploads/converted-image-' . $memoryId . '.jpg';
+        Storage::disk('spaces')->put($outputPath, fopen(storage_path('app/' . $tempPath), 'r+'), 'public');
+        
+        // Delete the local temporary file
+        unlink(storage_path('app/' . $tempPath));
+
+        // Save the DigitalOcean Spaces file path in the database
         $file = new File();
         $file->user_id = Auth::id();
         $file->memory_id = $memoryId;
         $file->file_path = $outputPath;
         $file->save();
     }
+
     
     public function delete(string $title)
     {

@@ -96,21 +96,29 @@ class MemoryController extends Controller
                         $file->memory_id = $memory->id;
                         $file->file_path = $originalPath;
                         $file->save();
-    
-                        // Transcode videos
-                        if (in_array($extension, ['mp4', 'avi', 'quicktime', 'mpeg', 'mov'])) {
-                            $this->transcodeVideo(storage_path('app/' . $originalPath), $memory->id);
+                        
+                          // Transcode videos
+                          if (in_array($extension, ['mp4', 'avi', 'quicktime', 'mpeg', 'mov'])) {
+                            $newFilePath = $this->transcodeVideo(storage_path('app/' . $originalPath), $memory->id);
+                            $file->file_path = $newFilePath; // Update file path with transcoded version
+                            $file->save(); // Save the updated file record
                         }
     
                         // Convert audio formats
                         if (in_array($extension, ['aiff', 'mpeg', 'm4a', 'mp3'])) {
-                            $this->transcodeAudio(storage_path('app/' . $originalPath), $memory->id);
+                            $newFilePath = $this->transcodeAudio(storage_path('app/' . $originalPath), $memory->id);
+                            $file->file_path = $newFilePath; // Update file path with transcoded version
+                            $file->save(); // Save the updated file record
                         }
     
                         // Convert HEIC to JPEG
                         if ($extension === 'heic') {
-                            $this->convertHeicToJpeg(storage_path('app/' . $originalPath), $memory->id);
+                            $newFilePath = $this->convertHeicToJpeg(storage_path('app/' . $originalPath), $memory->id);
+                            $file->file_path = $newFilePath; // Update file path with converted image
+                            $file->save(); // Save the updated file record
                         }
+                        
+                        unlink(storage_path('app/' . $originalPath));
                     }
                 }
             }

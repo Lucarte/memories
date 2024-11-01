@@ -147,15 +147,16 @@ class MemoryController extends Controller
         }
     }
     
-    private function transcodeVideo($path, $memoryId)
+    private function transcodeVideo($filePath, $memoryId)
     {
         try {
             $ffmpeg = FFMpeg::create();
             
-            // Construct the full URL for the video file
-            $spacesUrl = env('DO_SPACES_ENDPOINT') . '/' . $path; // Construct the URL
+            // Construct the full URL for accessing the video in DigitalOcean Spaces
+            $spacesUrl = env('DO_SPACES_BUCKET') . '.' . env('DO_SPACES_DEFAULT_REGION') . '.cdn.digitaloceanspaces.com/' . $filePath;
     
-            $video = $ffmpeg->open($spacesUrl); // Use the constructed URL
+            // Open the video from the DigitalOcean Spaces URL
+            $video = $ffmpeg->open($spacesUrl);
     
             $outputFormat = new X264();
             $outputFormat->setKiloBitrate(1000)->setAudioKiloBitrate(128);
@@ -164,24 +165,25 @@ class MemoryController extends Controller
             $tempPath = storage_path('app/converted-video-' . $memoryId . '.mp4');
             $video->save($outputFormat, $tempPath);
     
-            // Upload to DigitalOcean Spaces
+            // Upload the transcoded video back to DigitalOcean Spaces
             $outputPath = 'uploads/converted-video-' . $memoryId . '.mp4';
             $uploaded = Storage::disk('spaces')->put($outputPath, fopen($tempPath, 'r+'), 'public');
     
-            // Delete the local temporary file
+            // Delete the temporary file from local storage
             unlink($tempPath);
     
             if ($uploaded) {
-                return $outputPath; // Return the new file path
+                return $outputPath; // Return the path of the uploaded video
             } else {
                 Log::error('Failed to upload transcoded video to DigitalOcean Spaces.');
-                return null; // Handle upload failure
+                return null;
             }
         } catch (\Exception $e) {
             Log::error('Error during video transcoding: ' . $e->getMessage());
-            return null; // Handle any errors during transcoding
+            return null;
         }
-    }    
+    }
+    
     
     
     private function transcodeAudio($path, $memoryId)

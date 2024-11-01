@@ -97,13 +97,15 @@ class MemoryController extends Controller
                         $file->file_path = $originalPath;
                         $file->save();
                         
-                          // Transcode videos
-                          if (in_array($extension, ['mp4', 'avi', 'quicktime', 'mpeg', 'mov'])) {
+                        // Transcode videos
+                        if (in_array($extension, ['mp4', 'avi', 'quicktime', 'mpeg', 'mov'])) {
                             $newFilePath = $this->transcodeVideo(storage_path('app/' . $originalPath), $memory->id);
-                            $file->file_path = $newFilePath; // Update file path with transcoded version
-                            $file->save(); // Save the updated file record
+                            if ($newFilePath) { // Check if transcoding was successful
+                                $file->file_path = $newFilePath; // Update file path with transcoded version
+                                $file->save(); // Save the updated file record
+                            }
                         }
-    
+                        
                         // Convert audio formats
                         if (in_array($extension, ['aiff', 'mpeg', 'm4a', 'mp3'])) {
                             $newFilePath = $this->transcodeAudio(storage_path('app/' . $originalPath), $memory->id);
@@ -144,30 +146,36 @@ class MemoryController extends Controller
     
     private function transcodeVideo($path, $memoryId)
     {
-        $ffmpeg = FFMpeg::create();
-        $video = $ffmpeg->open($path);
-        
-        // Define the output format with quality control
-        $outputFormat = new X264();
-        $outputFormat->setKiloBitrate(1000)->setAudioKiloBitrate(128);
-        
-        // Define a temporary local path to save the converted video
-        $tempPath = 'converted-video-' . $memoryId . '.mp4';
-        $video->save($outputFormat, storage_path('app/' . $tempPath));
-        
-        // Upload to DigitalOcean Spaces
-        $outputPath = 'uploads/converted-video-' . $memoryId . '.mp4';
-        Storage::disk('spaces')->put($outputPath, fopen(storage_path('app/' . $tempPath), 'r+'), 'public');
-        
-        // Delete the local temporary file
-        unlink(storage_path('app/' . $tempPath));
+        try {
+            $ffmpeg = FFMpeg::create();
+            $video = $ffmpeg->open($path);
     
-        // Save the DigitalOcean Spaces file path in the database
-        $file = new File();
-        $file->user_id = Auth::id();
-        $file->memory_id = $memoryId;
-        $file->file_path = $outputPath;
-        $file->save();
+            // Define the output format with quality control
+            $outputFormat = new X264();
+            $outputFormat->setKiloBitrate(1000)->setAudioKiloBitrate(128);
+    
+            // Define a temporary local path to save the converted video
+            $tempPath = 'converted-video-' . $memoryId . '.mp4';
+            $video->save($outputFormat, storage_path('app/' . $tempPath));
+    
+            // Upload to DigitalOcean Spaces
+            $outputPath = 'uploads/converted-video-' . $memoryId . '.mp4';
+            $uploaded = Storage::disk('spaces')->put($outputPath, fopen(storage_path('app/' . $tempPath), 'r+'), 'public');
+    
+            // Delete the local temporary file
+            unlink(storage_path('app/' . $tempPath));
+    
+            // Check if upload was successful
+            if ($uploaded) {
+                return $outputPath; // Return the new file path
+            } else {
+                Log::error('Failed to upload transcoded video to DigitalOcean Spaces.');
+                return null; // Handle upload failure
+            }
+        } catch (\Exception $e) {
+            Log::error('Error during video transcoding: ' . $e->getMessage());
+            return null; // Handle any errors during transcoding
+        }
     }
     
     private function transcodeAudio($path, $memoryId)

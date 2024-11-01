@@ -88,7 +88,10 @@ class MemoryController extends Controller
                     foreach ($request->file($fileType) as $uploadedFile) {
                         $extension = $uploadedFile->getClientOriginalExtension();
                         $title = $memory->title;
-                        $originalPath = $uploadedFile->storeAs('uploads', time() . '_' . $title . '.' . $extension, 'spaces');
+                        $originalPath = 'uploads/' . time() . '_' . $title . '.' . $extension;
+
+                        // Upload the file directly to Spaces
+                        Storage::disk('spaces')->put($originalPath, fopen($uploadedFile->getPathname(), 'r+'), 'public');
     
                         // Create a new file associated with this memory
                         $file = new File();
@@ -97,10 +100,10 @@ class MemoryController extends Controller
                         $file->file_path = $originalPath;
                         $file->save();
                         
-                        // Transcode videos
+                        // Transcode videos if applicable
                         if (in_array($extension, ['mp4', 'avi', 'quicktime', 'mpeg', 'mov'])) {
-                            $newFilePath = $this->transcodeVideo(storage_path('app/' . $originalPath), $memory->id);
-                            if ($newFilePath) { // Check if transcoding was successful
+                            $newFilePath = $this->transcodeVideo($originalPath, $memory->id);
+                            if ($newFilePath) {
                                 $file->file_path = $newFilePath; // Update file path with transcoded version
                                 $file->save(); // Save the updated file record
                             }
@@ -148,24 +151,26 @@ class MemoryController extends Controller
     {
         try {
             $ffmpeg = FFMpeg::create();
-            $video = $ffmpeg->open($path);
+            
+            // Construct the full URL for the video file
+            $spacesUrl = env('DO_SPACES_ENDPOINT') . '/' . $path; // Construct the URL
     
-            // Define the output format with quality control
+            $video = $ffmpeg->open($spacesUrl); // Use the constructed URL
+    
             $outputFormat = new X264();
             $outputFormat->setKiloBitrate(1000)->setAudioKiloBitrate(128);
     
             // Define a temporary local path to save the converted video
-            $tempPath = 'converted-video-' . $memoryId . '.mp4';
-            $video->save($outputFormat, storage_path('app/' . $tempPath));
+            $tempPath = storage_path('app/converted-video-' . $memoryId . '.mp4');
+            $video->save($outputFormat, $tempPath);
     
             // Upload to DigitalOcean Spaces
             $outputPath = 'uploads/converted-video-' . $memoryId . '.mp4';
-            $uploaded = Storage::disk('spaces')->put($outputPath, fopen(storage_path('app/' . $tempPath), 'r+'), 'public');
+            $uploaded = Storage::disk('spaces')->put($outputPath, fopen($tempPath, 'r+'), 'public');
     
             // Delete the local temporary file
-            unlink(storage_path('app/' . $tempPath));
+            unlink($tempPath);
     
-            // Check if upload was successful
             if ($uploaded) {
                 return $outputPath; // Return the new file path
             } else {
@@ -176,7 +181,8 @@ class MemoryController extends Controller
             Log::error('Error during video transcoding: ' . $e->getMessage());
             return null; // Handle any errors during transcoding
         }
-    }
+    }    
+    
     
     private function transcodeAudio($path, $memoryId)
     {

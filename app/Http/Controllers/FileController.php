@@ -96,12 +96,12 @@ class FileController extends Controller
                                     case 'image/png':
                                     case 'image/gif':
                                     case 'image/svg+xml':
-                                        $maxSize = 5 * 1024 * 1024; // 5MB
+                                        $maxSize = 10 * 1024 * 1024; // 10MB
                                         break;
                                     case 'audio/x-aiff':
                                     case 'audio/mpeg':
                                     case 'audio/mp3':
-                                        $maxSize = 10 * 1024 * 1024; // 10MB
+                                        $maxSize = 30 * 1024 * 1024; // 30MB
                                         break;
                                     case 'video/mp4':
                                     case 'video/avi':

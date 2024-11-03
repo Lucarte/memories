@@ -157,7 +157,7 @@ class MemoryController extends Controller
             $ffmpeg = FFMpeg::create();
             
             // Construct the full URL for accessing the video in DigitalOcean Spaces
-            $spacesUrl = 'https://memoiresbucket.fra1.cdn.digitaloceanspaces.com/' . $filePath;
+            $spacesUrl = 'https://memoriesbucket.fra1.cdn.digitaloceanspaces.com/' . $filePath;
 
             // Open the video from the DigitalOcean Spaces URL
             $video = $ffmpeg->open($spacesUrl);

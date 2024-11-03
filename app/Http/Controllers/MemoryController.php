@@ -39,6 +39,10 @@ class MemoryController extends Controller
     
     public function createWithFile(Request $request)
     {
+        // Log to check the values of DO_SPACES_BUCKET and DO_SPACES_DEFAULT_REGION
+        Log::info('DO_SPACES_BUCKET: ' . env('DO_SPACES_BUCKET'));
+        Log::info('DO_SPACES_DEFAULT_REGION: ' . env('DO_SPACES_DEFAULT_REGION'));
+
         try {
             // Validation rules for memory creation
             $rules = [

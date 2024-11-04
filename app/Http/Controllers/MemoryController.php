@@ -54,13 +54,13 @@ class MemoryController extends Controller
                 'category_ids' => 'required|array',
                 'category_ids.*' => 'exists:categories,id',
             ];
-
+    
             $validator = Validator::make($request->all(), $rules);
-
+    
             if ($validator->fails()) {
                 return response()->json(['message' => $validator->errors()], Response::HTTP_BAD_REQUEST);
             }
-
+    
             // Create a new memory instance
             $memory = new Memory();
             $memory->user_id = Auth::id();
@@ -70,21 +70,30 @@ class MemoryController extends Controller
             $memory->year = $request->input('year');
             $memory->month = $request->input('month');
             $memory->day = $request->input('day');
+    
+            // Set memory_date
+            $year = $request->input('year');
+            $month = $request->input('month');
+            $day = $request->input('day');
+            // Create a date string and set it
+            $memory_date = \Carbon\Carbon::createFromDate($year, $month, $day)->toDateString();
+            $memory->memory_date = $memory_date;
+    
             $memory->save();
-
+    
             // Handle categories
             $memory->categories()->sync($request->input('category_ids'));
-
+    
             // Handle multiple file uploads
             $filePaths = ['image_paths', 'audio_paths', 'video_paths'];
-
+    
             foreach ($filePaths as $fileType) {
                 if ($request->hasFile($fileType) && is_array($request->file($fileType))) {
                     foreach ($request->file($fileType) as $index => $uploadedFile) {
                         $extension = $uploadedFile->getClientOriginalExtension();
                         $title = $memory->title;
                         $path = $uploadedFile->storeAs('uploads', time() . '_' . $title . '.' . $extension, 'spaces');
-
+    
                         // Create a new file associated with this memory
                         $file = new File();
                         $file->user_id = Auth::id();
@@ -94,7 +103,7 @@ class MemoryController extends Controller
                     }
                 }
             }
-
+    
             // Handle URLs
             if ($request->filled('urls')) {
                 // Split the comma-separated URLs into an array
@@ -106,13 +115,14 @@ class MemoryController extends Controller
                     $url->save();
                 }
             }
-
+    
             // Return success response
             return response()->json(['message' => 'Memory created successfully!'], Response::HTTP_CREATED);
         } catch (\Exception $e) {
             return response()->json(['message' => '===FATAL=== ' . $e->getMessage()], Response::HTTP_INTERNAL_SERVER_ERROR);
         }
     }
+    
 
     public function delete(string $title)
     {

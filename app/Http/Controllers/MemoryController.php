@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use Carbon\Carbon;
 use App\Models\Url;
 use App\Models\File;
 use App\Models\Memory;
@@ -71,13 +72,36 @@ class MemoryController extends Controller
             $memory->month = $request->input('month');
             $memory->day = $request->input('day');
     
-            // Set memory_date
+            // Convert month name to a numeric value
+            $monthNames = [
+                'January' => 1,
+                'February' => 2,
+                'March' => 3,
+                'April' => 4,
+                'May' => 5,
+                'June' => 6,
+                'July' => 7,
+                'August' => 8,
+                'September' => 9,
+                'October' => 10,
+                'November' => 11,
+                'December' => 12,
+            ];
+    
+            // Retrieve and convert month name to numeric value
             $year = $request->input('year');
-            $month = $request->input('month');
+            $monthName = $request->input('month');
             $day = $request->input('day');
-            // Create a date string and set it
-            $memory_date = \Carbon\Carbon::createFromDate($year, $month, $day)->toDateString();
-            $memory->memory_date = $memory_date;
+            $numericMonth = $monthNames[$monthName] ?? null;
+    
+            if ($numericMonth) {
+                // Create a date string with the numeric month value
+                $memory_date = Carbon::createFromDate($year, $numericMonth, $day)->toDateString();
+                $memory->memory_date = $memory_date;
+            } else {
+                // Handle invalid month name if needed
+                return response()->json(['error' => 'Invalid month name'], 400);
+            }
     
             $memory->save();
     
@@ -121,8 +145,7 @@ class MemoryController extends Controller
         } catch (\Exception $e) {
             return response()->json(['message' => '===FATAL=== ' . $e->getMessage()], Response::HTTP_INTERNAL_SERVER_ERROR);
         }
-    }
-    
+    }    
 
     public function delete(string $title)
     {

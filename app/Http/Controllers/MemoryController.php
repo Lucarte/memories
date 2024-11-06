@@ -168,43 +168,47 @@ class MemoryController extends Controller
     }
 
     public function getAllMemories()
-    {
-        try {
-            $memories = Memory::with([
-                'files:id,memory_id,file_path',
-                'urls',
-                'user.avatar',
-                'categories:id,category' // Include the categories relationship
-            ])
-                ->select('id', 'user_id', 'title', 'description', 'year', 'month', 'day', 'created_at', 'updated_at')
-                ->get();
+{
+    try {
+        // Fetch all memories with related data
+        $memories = Memory::with([
+            'files:id,memory_id,file_path',
+            'urls',
+            'user.avatar',
+            'categories:id,category' // Include the categories relationship
+        ])
+            ->select('id', 'user_id', 'title', 'description', 'year', 'month', 'day', "memory_date", 'created_at', 'updated_at')
+            ->get();
 
-            // Map through memories and ensure the file paths and categories are set correctly
-            $memories = $memories->map(function ($memory) {
-                $memory->files = $memory->files->map(function ($file) {
-                    return [
-                        'id' => $file->id,
-                        'file_path' => $file->file_path,
-                    ];
-                });
-                // Format categories to include only relevant details
-                $memory->categories = $memory->categories->map(function ($category) {
-                    return [
-                        'id' => $category->id,
-                        'name' => $category->name,
-                    ];
-                });
-                return $memory;
+        // Sort memories by memory_date in descending order
+        $memories = $memories->sortByDesc('memory_date')->values();
+
+        // Map through memories to format file paths and categories
+        $memories = $memories->map(function ($memory) {
+            $memory->files = $memory->files->map(function ($file) {
+                return [
+                    'id' => $file->id,
+                    'file_path' => $file->file_path,
+                ];
             });
+            // Format categories to include only relevant details
+            $memory->categories = $memory->categories->map(function ($category) {
+                return [
+                    'id' => $category->id,
+                    'name' => $category->category,
+                ];
+            });
+            return $memory;
+        });
 
-            return response()->json([
-                'message' => 'LIST OF ALL MEMORIES',
-                'Memories' => $memories
-            ], Response::HTTP_OK);
-        } catch (\Exception $e) {
-            return response()->json(['message' => '===FATAL=== ' . $e->getMessage()], Response::HTTP_INTERNAL_SERVER_ERROR);
-        }
+        return response()->json([
+            'message' => 'LIST OF ALL MEMORIES',
+            'Memories' => $memories
+        ], Response::HTTP_OK);
+    } catch (\Exception $e) {
+        return response()->json(['message' => '===FATAL=== ' . $e->getMessage()], Response::HTTP_INTERNAL_SERVER_ERROR);
     }
+}
 
     public function index($kid = null)
     {
@@ -232,9 +236,10 @@ class MemoryController extends Controller
             if ($kid) {
                 $memories = Memory::where('kid', $kid)
                     ->with(['files:id,memory_id,file_path', 'urls', 'user.avatar', 'categories:id,category'])
-                    ->select('id', 'user_id', 'title', 'description', 'year', 'month', 'day', 'created_at', 'updated_at')
+                    ->select('id', 'user_id', 'title', 'description', 'year', 'month', 'day', 'memory_date', 'created_at', 'updated_at')
+                    ->orderBy('memory_date', 'desc')  // Order by memory_date in descending order
                     ->get();
-
+    
                 $memories = $memories->map(function ($memory) {
                     $memory->files = $memory->files->map(function ($file) {
                         return [
@@ -244,18 +249,19 @@ class MemoryController extends Controller
                     });
                     return $memory;
                 });
-
+    
                 return response()->json([
                     'message' => 'LIST OF MEMORIES FOR ' . ucfirst($kid),
                     'Memories' => $memories
                 ], Response::HTTP_OK);
             }
-
+    
             return response()->json(['message' => 'No kid specified.'], Response::HTTP_OK);
         } catch (\Exception $e) {
             return response()->json(['message' => '===FATAL=== ' . $e->getMessage()], Response::HTTP_INTERNAL_SERVER_ERROR);
         }
     }
+    
 
     // Single retrieval with files and urls
     public function show(string $title)

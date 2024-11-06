@@ -28,11 +28,6 @@ class Memory extends Model
         });
     }
 
-    /**
-     * The attributes that are mass assignable.
-     *
-     * @var array<int, string>
-     */
     protected $fillable = [
         'title',
         'description',
@@ -41,6 +36,13 @@ class Memory extends Model
         'month',
         'day',
     ];
+
+    // Define the memory_date accessor
+    public function getMemoryDateAttribute()
+    {
+        // Format memory_date as "YYYY-MM-DD" string
+        return "{$this->year}-" . str_pad($this->month, 2, "0", STR_PAD_LEFT) . "-" . str_pad($this->day, 2, "0", STR_PAD_LEFT);
+    }
 
     public function user()
     {
@@ -57,15 +59,11 @@ class Memory extends Model
         return $this->belongsToMany(Category::class, 'category_memory', 'memory_id', 'category_id');
     }
 
-
     public function urls()
     {
         return $this->hasMany(Url::class, 'memory_id');
     }
 
-    /**
-     * Modify the query used to retrieve models when making all of the models searchable.
-     */
     protected function makeAllSearchableUsing(Builder $query): Builder
     {
         return $query->with([
@@ -78,10 +76,13 @@ class Memory extends Model
 
     public function toSearchableArray()
     {
-        // Customize the array returned to MeiliSearch
+        // Convert the model instance to an array
         $array = $this->toArray();
 
-        // Ensure relationships are properly formatted
+        // Add memory_date to the searchable array
+        $array['memory_date'] = $this->memory_date;
+
+        // Add related models as well
         $array['user'] = $this->user ? $this->user->toArray() : null;
         $array['files'] = $this->files ? $this->files->toArray() : [];
         $array['categories'] = $this->categories ? $this->categories->toArray() : [];

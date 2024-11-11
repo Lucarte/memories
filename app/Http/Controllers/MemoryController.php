@@ -116,7 +116,11 @@ class MemoryController extends Controller
                     foreach ($request->file($fileType) as $index => $uploadedFile) {
                         $extension = $uploadedFile->getClientOriginalExtension();
                         $title = $memory->title;
-                        $path = $uploadedFile->storeAs('uploads', time() . '_' . $title . '.' . $extension, 'spaces');
+                        $path = $uploadedFile->storeAs(
+                            'uploads',
+                            uniqid() . '_' . time() . '_' . $title . '.' . $extension,
+                            'spaces'
+                        );
     
                         // Create a new file associated with this memory
                         $file = new File();

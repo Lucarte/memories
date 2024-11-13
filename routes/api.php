@@ -50,12 +50,12 @@ Route::prefix('auth')->group(function () {
 
         // Admin-specific routes
         Route::middleware('is_admin')->group(function () {
-        Route::get('/admin/users', [AdminController::class, 'index']);  // Get unapproved users
-        Route::post('/admin/users/{id}/approve', [AdminController::class, 'approve']);  // Approve user
+        Route::get('/admin/fans', [AdminController::class, 'index']);  // Get unapproved users
+        Route::post('/admin/fans/{id}/approve', [AdminController::class, 'approve']);  // Approve user
         });
         
         // ADMIN & profile owners
-        Route::controller(UserController::class)->group(function () {
+            Route::controller(UserController::class)->group(function () {
             // Only 'admin' (set manually on DB) can see the fans list
             Route::get('/fans', 'index');
 

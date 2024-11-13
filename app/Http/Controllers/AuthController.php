@@ -103,42 +103,52 @@ class AuthController extends Controller
             return response()->json([
                 'message' => 'Invalid data',
                 'errors' => $validator->errors(),
-            ]);
+            ], Response::HTTP_BAD_REQUEST);
         }
 
-        // Check if credentials are valid
-        $credentials = $request->only('email', 'password');
+        $credentials = [
+            'email' => $request->input('email'),
+            'password' => $request->input('password'),
+        ];
 
         if (Auth::attempt($credentials)) {
             $user = Auth::user();
 
             // Check if the user is approved
             if (!$user->is_approved) {
-                Auth::logout();
-                return response()->json(['message' => 'Your account is pending approval.'], 403);
+                Auth::logout(); // Log the user out
+                return response()->json([
+                    'message' => 'Your account is pending approval by the admin.'
+                ], Response::HTTP_FORBIDDEN);
             }
 
-            // Generate token or session as usual, with personalized message
+            // User is approved, login successful
             $firstName = $user->first_name;
-            return response()->json(['user' => $user, 'message' => "Login successful, $firstName!"], Response::HTTP_OK);
+            return response()->json([
+                'user' => $user,
+                'message' => "Login successful, $firstName!"
+            ], Response::HTTP_OK);
+        } else {
+            // Authentication failed
+            return response()->json([
+                'message' => 'Login failed'
+            ], Response::HTTP_UNAUTHORIZED);
         }
-
-        // If authentication fails
-        return response()->json(['message' => 'Login failed'], Response::HTTP_UNAUTHORIZED);
     }
-
 
     // LOGOUT
     public function logout(Request $request)
     {
+        $user = Auth::user();
+        $firstName = $user->first_name;
+
         Auth::guard('web')->logout();
         $request->session()->invalidate();
         $request->session()->regenerateToken();
 
-        $user = Auth::user();
-        $firstName = $user->first_name;
         return response()->json(['message' => "You have been logged out successfully, $firstName!"], Response::HTTP_OK);
     }
+
 
     // STATUS - with id
     public function loginStatus()

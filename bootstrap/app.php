@@ -13,11 +13,6 @@ return Application::configure(basePath: dirname(__DIR__))
     )
     ->withMiddleware(function (Middleware $middleware) {
         $middleware->statefulApi();
-        // $middleware->trustHosts([
-        //     'https://mypearlsofgreatprice.de',
-        //     'https://api.mypearlsofgreatprice.de',
-        // ]);
-        
     })
     ->withExceptions(function (Exceptions $exceptions) {
         //

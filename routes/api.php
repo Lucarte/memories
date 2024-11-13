@@ -5,6 +5,7 @@ use App\Http\Controllers\UrlController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\FileController;
 use App\Http\Controllers\UserController;
+use App\Http\Controllers\AdminController;
 use App\Http\Controllers\MemoryController;
 use App\Http\Controllers\SearchController;
 use App\Http\Controllers\CommentController;
@@ -47,6 +48,12 @@ Route::prefix('auth')->group(function () {
             Route::patch('/url/{id}', 'update')->whereNumber('id');
         });
 
+        // Admin-specific routes
+        Route::middleware('is_admin')->group(function () {
+        Route::get('/admin/users', [AdminController::class, 'index']);  // Get unapproved users
+        Route::post('/admin/users/{id}/approve', [AdminController::class, 'approve']);  // Approve user
+        });
+        
         // ADMIN & profile owners
         Route::controller(UserController::class)->group(function () {
             // Only 'admin' (set manually on DB) can see the fans list

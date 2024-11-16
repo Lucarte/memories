@@ -19,11 +19,13 @@ return [
 
     'allowed_methods' => ['*'],
 
-    'allowed_origins' => [
-        'https://api.mypearlsofgreatprice.de', 
-        'https://mypearlsofgreatprice.de', 
-        'https://www.mypearlsofgreatprice.de'
-    ],
+    // 'allowed_origins' => [
+    //     'https://api.mypearlsofgreatprice.de', 
+    //     'https://mypearlsofgreatprice.de', 
+    //     'https://www.mypearlsofgreatprice.de'
+    // ],
+
+    'allowed_origins' => ['*'], // only for testing purposes
 
     'allowed_origins_patterns' => [],
 

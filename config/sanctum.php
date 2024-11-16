@@ -15,15 +15,7 @@ return [
     |
     */
 
-    'stateful' => explode(',', env('SANCTUM_STATEFUL_DOMAINS', sprintf(
-        '%s%s',
-        '104.248.123.220',
-        'localhost',
-        'api.mypearlsofgreatprice.de',
-        Sanctum::currentApplicationUrlWithPort()
-    ))),
-
-
+    'stateful' => explode(',', env('SANCTUM_STATEFUL_DOMAINS', 'localhost,127.0.0.1,api.mypearlsofgreatprice.de,www.mypearlsofgreatprice.de,mypearlsofgreatprice.de')),
 
     /*
     |--------------------------------------------------------------------------

@@ -15,6 +15,8 @@ return [
     |
     */
 
+    'domain' => env('SESSION_DOMAIN', '.mypearlsofgreatprice.de'),
+
     'stateful' => explode(',', env('SANCTUM_STATEFUL_DOMAINS', 'localhost,127.0.0.1,api.mypearlsofgreatprice.de,www.mypearlsofgreatprice.de,mypearlsofgreatprice.de')),
 
     /*

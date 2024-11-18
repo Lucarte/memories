@@ -11,12 +11,15 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rules\Password;
+use Illuminate\Support\Facades\Notification;
+use App\Notifications\NewUserSignupNotification;
 
 class AuthController extends Controller
 {
     // REGISTER
     public function register(Request $request)
     {
+        // Validate the request input
         $request->validate([
             'firstName' => [
                 'required',
@@ -56,7 +59,7 @@ class AuthController extends Controller
             ],
         ]);
 
-        // Create the user
+        // Create the user with is_approved set to false
         $user = User::create([
             'first_name' => $request->get('firstName'),
             'last_name' => $request->get('lastName'),
@@ -64,26 +67,27 @@ class AuthController extends Controller
             'password' => Hash::make($request->get('password')),
             'relationship_to_kid' => $request->get('relationshipToKid'),
             'terms' => $request->get('terms') ? 1 : 0,
+            'is_approved' => false,  // New field to indicate pending approval
         ]);
 
-        // Create avatar file
+        // Upload and associate the avatar with the user, if provided
         if ($request->hasFile('avatar_path')) {
             $uploadedAvatar = $request->file('avatar_path');
             $extension = $uploadedAvatar->getClientOriginalExtension();
             $name = $user->first_name;
-            $path = $uploadedAvatar->storeAs('avatars', time() . '_' . $name . '-' . 'avatar' . '.' . $extension, 'spaces');
+            $path = $uploadedAvatar->storeAs('avatars', time() . '_' . $name . '-avatar.' . $extension, 'spaces');
 
-            // Create new avatar associated with this user
             $avatar = new Avatar();
             $avatar->user_id = $user->id;
             $avatar->avatar_path = $path;
             $avatar->save();
         }
 
+        // Find all admin users to notify them of the new registration
+        $adminUsers = User::where('is_admin', true)->get();
+        Notification::send($adminUsers, new NewUserSignupNotification($user));
 
-        Auth::login($user);
-        $firstName = $user->first_name;
-        return response()->json(['message' => "Registration successful! You can now login, $firstName!"], Response::HTTP_CREATED);
+        return response()->json(['message' => 'Registration successful! Your account is awaiting approval.'], Response::HTTP_CREATED);
     }
 
     // LOGIN
@@ -99,7 +103,7 @@ class AuthController extends Controller
             return response()->json([
                 'message' => 'Invalid data',
                 'errors' => $validator->errors(),
-            ]);
+            ], Response::HTTP_BAD_REQUEST);
         }
 
         $credentials = [
@@ -108,27 +112,43 @@ class AuthController extends Controller
         ];
 
         if (Auth::attempt($credentials)) {
-            $fan = Auth::user();
-            $firstName = $fan->first_name;
+            $user = Auth::user();
 
-            return response()->json(['fan' => $fan, 'message' => "Login successful, $firstName!"], Response::HTTP_OK);
+            // Check if the user is approved
+            if (!$user->is_approved) {
+                Auth::logout(); // Log the user out
+                return response()->json([
+                    'message' => 'Your account is pending approval by the admin.'
+                ], Response::HTTP_FORBIDDEN);
+            }
+
+            // User is approved, login successful
+            $firstName = $user->first_name;
+            return response()->json([
+                'user' => $user,
+                'message' => "Login successful, $firstName!"
+            ], Response::HTTP_OK);
         } else {
             // Authentication failed
-            return response()->json(['message' => 'Login failed'], Response::HTTP_UNAUTHORIZED);
+            return response()->json([
+                'message' => 'Login failed'
+            ], Response::HTTP_UNAUTHORIZED);
         }
     }
 
     // LOGOUT
     public function logout(Request $request)
     {
+        $user = Auth::user();
+        $firstName = $user->first_name;
+
         Auth::guard('web')->logout();
         $request->session()->invalidate();
         $request->session()->regenerateToken();
 
-        $user = Auth::user();
-        $firstName = $user->first_name;
         return response()->json(['message' => "You have been logged out successfully, $firstName!"], Response::HTTP_OK);
     }
+
 
     // STATUS - with id
     public function loginStatus()

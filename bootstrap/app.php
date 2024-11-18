@@ -12,7 +12,14 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware) {
-        $middleware->statefulApi();
+        $middleware->statefulApi(); // Ensures Sanctum works for stateful SPAs
+
+        // Define middleware for the 'api' group
+        $middleware->group('api', [
+            Illuminate\Routing\Middleware\ThrottleRequests::class, // Handles rate limiting
+            Illuminate\Routing\Middleware\SubstituteBindings::class, // Handles route bindings
+            App\Http\Middleware\CsrfDebugMiddleware::class, // Custom middleware for CSRF debugging
+        ]);
     })
     ->withExceptions(function (Exceptions $exceptions) {
         //

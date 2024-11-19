@@ -113,22 +113,20 @@ class AuthController extends Controller
 
         if (Auth::attempt($credentials)) {
             $user = Auth::user();
-
-            // Check if the user is approved
+          
+            // Instead of logging out, return a pending approval message
             if (!$user->is_approved) {
-                Auth::logout(); // Log the user out
-                return response()->json([
-                    'message' => 'Your account is pending approval by the admin.'
-                ], Response::HTTP_FORBIDDEN);
+              return response()->json([
+                'message' => 'Your account is pending approval by the admin.'
+              ], Response::HTTP_FORBIDDEN);
             }
-
-            // User is approved, login successful
-            $firstName = $user->first_name;
+          
+            // Normal success login
             return response()->json([
-                'user' => $user,
-                'message' => "Login successful, $firstName!"
+              'message' => 'Login successful',
+              'user' => $user
             ], Response::HTTP_OK);
-        } else {
+          } else {
             // Authentication failed
             return response()->json([
                 'message' => 'Login failed'
@@ -170,4 +168,4 @@ class AuthController extends Controller
             ], 200);
         }
     }
-}
+}  

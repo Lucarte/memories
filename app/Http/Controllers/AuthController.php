@@ -110,28 +110,28 @@ class AuthController extends Controller
             'email' => $request->input('email'),
             'password' => $request->input('password'),
         ];
-
         if (Auth::attempt($credentials)) {
             $user = Auth::user();
-          
-            // Instead of logging out, return a pending approval message
+            
+            // Check if the user is approved
             if (!$user->is_approved) {
-              return response()->json([
-                'message' => 'Your account is pending approval by the admin.'
-              ], Response::HTTP_FORBIDDEN);
+                return response()->json([
+                    'errorMessage' => 'Your account is pending approval.',
+                ], 403); // Returning error message for unapproved users
             }
-          
-            // Normal success login
+        
+            // User is approved, return success
             return response()->json([
-              'message' => 'Login successful',
-              'user' => $user
-            ], Response::HTTP_OK);
-          } else {
-            // Authentication failed
-            return response()->json([
-                'message' => 'Login failed'
-            ], Response::HTTP_UNAUTHORIZED);
+                'successMessage' => 'Login successful',
+                'redirectTo' => '/memories',  // Make sure you pass this for redirect
+                'user' => $user,
+            ], 200);
         }
+        
+        // Authentication failed
+        return response()->json([
+            'errorMessage' => 'Invalid credentials',
+        ], 401);
     }
 
     // LOGOUT

@@ -150,18 +150,19 @@ class AuthController extends Controller
     }
 
 
+
     // STATUS - with id
     public function loginStatus()
     {
         if (auth()->check()) {
-            // Fetch user details
             $user = auth()->user();
-
+    
             return response()->json([
                 'loggedIn' => true,
                 'userId' => $user->id,
                 'isAdmin' => $user->is_admin,
                 'firstName' => $user->first_name,
+                'isApproved' => $user->is_approved, // Add this line
             ], 200);
         } else {
             return response()->json([

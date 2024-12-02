@@ -22,8 +22,7 @@ return [
     'allowed_origins' => [
         'https://api.mypearlsofgreatprice.de', 
         'https://mypearlsofgreatprice.de', 
-        'https://www.mypearlsofgreatprice.de',
-        'http://localhost:5173'
+        'https://www.mypearlsofgreatprice.de'
     ],
 
     'allowed_origins_patterns' => [],

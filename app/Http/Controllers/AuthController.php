@@ -111,12 +111,13 @@ class AuthController extends Controller
             'password' => $request->input('password'),
         ];
         if (Auth::attempt($credentials)) {
-            $user = Auth::user();
+            $fan = Auth::user();
+            $firstName = $fan->first_name;
             
             // Check if the user is approved
-            if (!$user->is_approved) {
+            if (!$fan->is_approved) {
                 return response()->json([
-                    'errorMessage' => 'Your account is pending approval.',
+                    'errorMessage' => `Your account is pending approval, $firstName.`,
                 ], 403); // Returning error message for unapproved users
             }
         
@@ -124,7 +125,7 @@ class AuthController extends Controller
             return response()->json([
                 'successMessage' => 'Login successful',
                 'redirectTo' => '/memories',  // Make sure you pass this for redirect
-                'user' => $user,
+                'fan' => $fan,
             ], 200);
         }
         
@@ -146,8 +147,6 @@ class AuthController extends Controller
 
         return response()->json(['message' => "You have been logged out successfully, $firstName!"], Response::HTTP_OK);
     }
-
-
 
     // STATUS - with id
     public function loginStatus()

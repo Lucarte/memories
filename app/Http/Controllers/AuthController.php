@@ -59,7 +59,6 @@ class AuthController extends Controller
             ],
         ]);
 
-        // Create the user with is_approved set to false
         $user = User::create([
             'first_name' => $request->get('firstName'),
             'last_name' => $request->get('lastName'),
@@ -67,7 +66,6 @@ class AuthController extends Controller
             'password' => Hash::make($request->get('password')),
             'relationship_to_kid' => $request->get('relationshipToKid'),
             'terms' => $request->get('terms') ? 1 : 0,
-            'is_approved' => false,  // New field to indicate pending approval
         ]);
 
         // Upload and associate the avatar with the user, if provided
@@ -114,16 +112,8 @@ class AuthController extends Controller
             $fan = Auth::user();
             $firstName = $fan->first_name;
             
-            // Check if the user is approved
-            if (!$fan->is_approved) {
-                return response()->json([
-                    'errorMessage' => `Your account is pending approval, $firstName.`,
-                ], 403); // Returning error message for unapproved users
-            }
-        
-            // User is approved, return success
             return response()->json([
-                'successMessage' => 'Login successful',
+                'successMessage' => `Login successful, $firstName`,
                 'redirectTo' => '/memories',  // Make sure you pass this for redirect
                 'fan' => $fan,
             ], 200);
@@ -160,7 +150,6 @@ class AuthController extends Controller
                 'userId' => $user->id,
                 'isAdmin' => $user->is_admin,
                 'firstName' => $user->first_name,
-                'isApproved' => $user->is_approved, // Add this line
             ], 200);
         } else {
             return response()->json([

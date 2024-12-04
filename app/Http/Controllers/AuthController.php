@@ -141,7 +141,6 @@ class AuthController extends Controller
     // STATUS - with id
     public function loginStatus()
     {
-        \Log::info('Checking user status', ['user' => auth()->user()]);
         if (auth()->check()) {
             $user = auth()->user();
     

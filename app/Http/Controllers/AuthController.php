@@ -85,7 +85,7 @@ class AuthController extends Controller
         $adminUsers = User::where('is_admin', true)->get();
         Notification::send($adminUsers, new NewUserSignupNotification($user));
 
-        return response()->json(['message' => 'Registration successful! Your account is awaiting approval.'], Response::HTTP_CREATED);
+        return \response()->json(['message' => 'Registration successful! Your account is awaiting approval.'], Response::HTTP_CREATED);
     }
 
     // LOGIN
@@ -138,22 +138,21 @@ class AuthController extends Controller
         return response()->json(['message' => "You have been logged out successfully, $firstName!"], Response::HTTP_OK);
     }
 
-    // STATUS - with id
     public function loginStatus()
-    {
-        if (auth()->check()) {
-            $user = auth()->user();
-    
-            return response()->json([
-                'loggedIn' => true,
-                'userId' => $user->id,
-                'isAdmin' => $user->is_admin,
-                'firstName' => $user->first_name,
-            ], 200);
-        } else {
-            return response()->json([
-                'loggedIn' => false,
-            ], 200);
-        }
+{
+    if (Auth::check()) {  // Use Auth facade explicitly
+        $user = Auth::user();
+
+        return response()->json([
+            'loggedIn' => true,
+            'userId' => $user->id,
+            'isAdmin' => $user->is_admin,
+            'firstName' => $user->first_name,
+        ], 200);
+    } else {
+        return response()->json([
+            'loggedIn' => false,
+        ], 200);
     }
+}
 }  

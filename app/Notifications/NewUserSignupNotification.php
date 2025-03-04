@@ -39,9 +39,9 @@ class NewUserSignupNotification extends Notification
                     ->line('User Email: ' . $this->user->email)
                     ->line('Click below to approve the user:')
                     ->line(
-                        `<form action="' . $approveUrl . '" method="POST">
+                        '<form action="' . $approveUrl . '" method="POST">
                             <button type="submit">Approve User</button>
-                        </form>`
+                        </form>'
                     ) // Manually create the form to send a POST request
                     ->line('Good Job, Mammut!');
     }

@@ -5,12 +5,13 @@ use Exception;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
+use App\Mail\UserApprovedMail;
 use Illuminate\Validation\Rule;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Gate;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rules\Password;
-use App\Notifications\UserApprovedNotification;
 
 class UserController extends Controller
 {
@@ -175,8 +176,8 @@ public function approveUser($userId)
     $user->is_approved = true;
     $user->save();
 
-    // Optionally, send a confirmation email to the user
-    // Mail::to($user->email)->send(new UserApprovedMail($user));
+     // Send a confirmation email to the user
+     Mail::to($user->email)->send(new UserApprovedMail($user));
 
     return response()->json(['message' => 'User approved successfully.']);
 }

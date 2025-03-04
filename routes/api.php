@@ -9,7 +9,9 @@ use App\Http\Controllers\MemoryController;
 use App\Http\Controllers\SearchController;
 use App\Http\Controllers\CommentController;
 
-Route::post('/approve-user/{userId}', [UserController::class, 'approveUser']);
+// Route::post('/approve-user/{userId}', [UserController::class, 'approveUser']);
+Route::get('/approve-user/{userId}', [UserController::class, 'triggerApproveUser']);
+
 
 Route::prefix('auth')->group(function () {
     Route::post('/register', [AuthController::class, 'register']);

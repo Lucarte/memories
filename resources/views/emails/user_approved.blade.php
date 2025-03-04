@@ -9,7 +9,8 @@
     <h1>Hello {{ $user->name }},</h1>
     <p>We are pleased to inform you that your account has been approved. You can now log in and start using the platform.</p>
     
-    <p><a href="{{ url('/login') }}">Click here to log in</a></p>
+    <p><a href="https://www.mypearlsofgreatprice.de/login">Click here to log in</a></p>
+
 
     <p>Thank you for being a part of our community!</p>
 

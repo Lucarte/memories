@@ -28,16 +28,19 @@ class NewUserSignupNotification extends Notification
         return ['mail'];
     }
 
-    /**
-     * Get the mail representation of the notification.
-     */
     public function toMail($notifiable)
-    {
-        return (new MailMessage)
-                    ->subject('New User Signup Approval Needed')
-                    ->line('A new user has signed up and is awaiting approval.')
-                    ->line('User Email: ' . $this->user->email)
-                    ->action('Approve User', url('/login'))
-                    ->line('Thank you for keeping the community safe!');
-    }
+    
+        /**
+         * Get the mail representation of the notification.
+         */
+{
+    $approveUrl = url('/api/approve-user/' . $this->user->id); // Change to your approval route
+
+    return (new MailMessage)
+                ->subject('New User Signup Approval Needed')
+                ->line('A new user has signed up and is awaiting approval.')
+                ->line('User Email: ' . $this->user->email)
+                ->action('Approve User', $approveUrl) // API URL for approving the user
+                ->line('Thank you for keeping the community safe!');
+}
 }

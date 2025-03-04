@@ -9,6 +9,9 @@ use App\Http\Controllers\MemoryController;
 use App\Http\Controllers\SearchController;
 use App\Http\Controllers\CommentController;
 
+Route::post('/approve-user/{userId}', [UserController::class, 'approveUser'])
+    ->middleware('auth:sanctum', 'is_admin');
+
 Route::prefix('auth')->group(function () {
     Route::post('/register', [AuthController::class, 'register']);
     Route::post('/login', [AuthController::class, 'login']);

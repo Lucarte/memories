@@ -10,6 +10,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rules\Password;
+use App\Notifications\UserApprovedNotification;
 
 class UserController extends Controller
 {
@@ -162,4 +163,19 @@ protected function getAvatarUrl($avatarPath)
     return env('DO_SPACES_ENDPOINT') . '/' . env('DO_SPACES_BUCKET') . '/' . $avatarPath;
 }
 
+   
+public function approveUser($userId)
+{
+    // Find the user by ID
+    $user = User::findOrFail($userId);
+
+    // Update the 'is_approved' column
+    $user->is_approved = true;
+    $user->save();
+
+    // Send approval notification
+    $user->notify(new UserApprovedNotification($user));
+
+    return response()->json(['message' => 'User approved and notification sent.']);
+}
 }

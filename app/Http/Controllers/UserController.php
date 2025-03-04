@@ -163,30 +163,12 @@ protected function getAvatarUrl($avatarPath)
     return env('DO_SPACES_ENDPOINT') . '/' . env('DO_SPACES_BUCKET') . '/' . $avatarPath;
 }
 
-public function approveUser($userId)
-{
-    $user = User::findOrFail($userId);
-
-    // Ensure that the admin is authorized to approve users
-    Gate::authorize('approveUser', $user);
-
-    // Update the is_approved column
-    $user->is_approved = true;
-    $user->save();
-
-    // Notify the user
-    $user->notify(new UserApprovedNotification($user));
-
-    return response()->json(['message' => 'User approved and notified.']);
-}
-
-
 // public function approveUser($userId)
 // {
 //     $user = User::findOrFail($userId);
 
 //     // Ensure that the admin is authorized to approve users
-//     $this->authorize('approveUser', $user);
+//     Gate::authorize('approveUser', $user);
 
 //     // Update the is_approved column
 //     $user->is_approved = true;
@@ -197,5 +179,21 @@ public function approveUser($userId)
 
 //     return response()->json(['message' => 'User approved and notified.']);
 // }
+
+public function approveUser($userId)
+{
+    $user = User::find($userId);
+
+    if (!$user) {
+        return response()->json(['message' => 'User not found'], 404);
+    }
+
+    // Only admin should be able to approve users
+    $user->is_approved = true;
+    $user->save();
+
+    return response()->json(['message' => 'User approved successfully']);
+}
+
 
 }

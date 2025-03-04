@@ -37,7 +37,7 @@ class NewUserSignupNotification extends Notification
                     ->subject('New User Signup Approval Needed')
                     ->line('A new user has signed up and is awaiting approval.')
                     ->line('User Email: ' . $this->user->email)
-                    ->action('Approve User', url('/admin/users'))
+                    ->action('Approve User', url('/login'))
                     ->line('Thank you for keeping the community safe!');
     }
 }

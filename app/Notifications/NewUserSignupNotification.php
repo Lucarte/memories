@@ -29,29 +29,22 @@ class NewUserSignupNotification extends Notification
     }
     
     public function toMail($notifiable)
-{
-    $approveUrl = route('approveUser', ['userId' => $this->user->id]);  // This will generate /api/approve-user/{userId}
-
-    return (new MailMessage)
-                ->subject('New User Signup Approval Needed')
-                ->line('A new user has signed up and is awaiting approval.')
-                ->line('User Email: ' . $this->user->email)
-                ->line('Click below to approve the user:')
-                ->action('Approve User', $approveUrl)
-                ->line('Thank you for keeping the community safe!');
-}
-
-        /**
-         * Get the mail representation of the notification.
-         */
-// {
-//     $approveUrl = url('/api/approve-user/' . $this->user->id); // Change to your approval route
-
-//     return (new MailMessage)
-//                 ->subject('New User Signup Approval Needed')
-//                 ->line('A new user has signed up and is awaiting approval.')
-//                 ->line('User Email: ' . $this->user->email)
-//                 ->action('Approve User', $approveUrl) // API URL for approving the user
-//                 ->line('Thank you for keeping the community safe!');
-// }
+    {
+        // Generate the URL for the approval endpoint
+        $approveUrl = url('api/approve-user/' . $this->user->id);  // This will generate /api/approve-user/{userId}
+    
+        return (new MailMessage)
+                    ->subject('New User Signup Approval Needed')
+                    ->line('A new user has signed up and is awaiting approval.')
+                    ->line('User Email: ' . $this->user->email)
+                    ->line('Click below to approve the user:')
+                    ->line('
+                        <form action="' . $approveUrl . '" method="POST">
+                            <input type="hidden" name="_token" value="' . csrf_token() . '">
+                            <button type="submit">Approve User</button>
+                        </form>
+                    ') // Manually create the form to send a POST request
+                    ->line('Thank you for keeping the community safe!');
+    }
+    
 }

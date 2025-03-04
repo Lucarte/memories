@@ -40,4 +40,10 @@ class UserPolicy
     {
         return $user->id === $id ? Response::allow('UserPolicy - update - allowed') : Response::deny('UserPolicy - update - denied');
     }
+
+    public function approveUser(User $user)
+{
+    return $user->isAdmin() ? Response::allow('UserPolicy - approveUser - allowed') : Response::deny('UserPolicy - approveUser - denied');
+}
+
 }

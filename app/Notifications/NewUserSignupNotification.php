@@ -31,18 +31,18 @@ class NewUserSignupNotification extends Notification
     public function toMail($notifiable)
     {
         // Generate the URL for the approval endpoint
-        $approveUrl = url('api/auth/approve-user/' . $this->user->id);  // This will generate /api/approve-user/{userId}
+        $approveUrl = url('api/approve-user/' . $this->user->id);  // This will generate /api/approve-user/{userId}
         
         return (new MailMessage)
                     ->subject('New User Signup Approval Needed')
                     ->line('A new user has signed up and is awaiting approval.')
                     ->line('User Email: ' . $this->user->email)
                     ->line('Click below to approve the user:')
-                    ->line('
-                        <form action="' . $approveUrl . '" method="POST">
+                    ->line(
+                        `<form action="' . $approveUrl . '" method="POST">
                             <button type="submit">Approve User</button>
-                        </form>
-                    ') // Manually create the form to send a POST request
-                    ->line('Thank you for keeping the community safe!');
+                        </form>`
+                    ) // Manually create the form to send a POST request
+                    ->line('Good Job, Mammut!');
     }
 }

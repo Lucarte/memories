@@ -139,20 +139,21 @@ class AuthController extends Controller
     }
 
     public function loginStatus()
-{
-    if (Auth::check()) {  // Use Auth facade explicitly
-        $user = Auth::user();
+    {
+        if (Auth::check()) {  // Use Auth facade explicitly
+            $user = Auth::user();
 
-        return response()->json([
-            'loggedIn' => true,
-            'userId' => $user->id,
-            'isAdmin' => $user->is_admin,
-            'firstName' => $user->first_name,
-        ], 200);
-    } else {
-        return response()->json([
-            'loggedIn' => false,
-        ], 200);
+            return response()->json([
+                'loggedIn' => true,
+                'userId' => $user->id,
+                'isAdmin' => $user->is_admin,
+                'isApproved' => $user->is_approved,
+                'firstName' => $user->first_name,
+            ], 200);
+        } else {
+            return response()->json([
+                'loggedIn' => false,
+            ], 200);
+        }
     }
-}
 }  
